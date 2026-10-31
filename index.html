@@ -157,41 +157,50 @@
   <!-- ========================================================================= -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
 
-    <!-- BANNER CẤU HÌNH SỐ ĐIỆN THOẠI CỦA TÔI ĐỂ NHẬN NHẮC NHỞ LÀM VĂN BẢN -->
-    <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white p-4 sm:p-5 rounded-2xl shadow-lg border border-blue-800/40 relative overflow-hidden">
+    <!-- BANNER CẤU HÌNH SỐ ĐIỆN THOẠI CỐ ĐỊNH NHẬN CẢNH BÁO ZALO -->
+    <div id="topPhoneBanner" class="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white p-4 sm:p-5 rounded-2xl shadow-lg border border-blue-800/40 relative overflow-hidden">
       <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 relative z-10">
         <div class="space-y-1 max-w-2xl">
           <div class="flex flex-wrap items-center gap-2">
             <span class="p-1.5 bg-blue-500/20 text-blue-300 rounded-lg border border-blue-400/30 flex items-center justify-center">
-              <i data-lucide="bell-ring" class="w-4 h-4"></i>
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
             </span>
             <h2 class="text-sm sm:text-base font-bold text-white tracking-wide flex items-center gap-2">
-              SỐ ĐIỆN THOẠI ZALO CỦA TÔI
-              <span class="text-xs font-normal text-blue-200">(Nhận thông báo để làm Văn bản gửi nhắc các đơn vị)</span>
+              SỐ ĐIỆN THOẠI NHẬN CẢNH BÁO ZALO CỐ ĐỊNH
             </h2>
+            <span id="badgeFixedPhone" class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-600 text-white shadow-sm hidden items-center gap-1">
+              <i data-lucide="lock" class="w-3 h-3"></i> Đã khóa cố định
+            </span>
             <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-600 text-white shadow-sm">
               Ngưỡng làm VB: ≤ 6 tháng (Theo Cột Y)
             </span>
           </div>
           <p class="text-xs text-blue-200/90 leading-relaxed">
-            Hệ thống sẽ quét và gửi tin nhắn cảnh báo về Zalo này khi phát hiện thiết bị đến hạn kiểm định gần nhất (<strong>Cột Y</strong>) còn lại <strong>≤ 6 tháng</strong> hoặc <strong>Đã quá hạn</strong> để bạn kịp thời làm văn bản đôn đốc các trạm.
+            Số điện thoại bạn thêm vào sẽ được <strong>giữ cố định lâu dài</strong> (trừ khi bạn bấm <em>"Đổi SĐT khác"</em>). Hệ thống <strong>chỉ gửi tin nhắn cảnh báo Zalo duy nhất cho số điện thoại cố định này</strong> khi phát hiện thiết bị đến hạn (<strong>Cột Y ≤ 6 tháng</strong>).
           </p>
         </div>
 
         <!-- Input Box & Buttons -->
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto">
-          <div class="relative flex-1 sm:w-60">
-            <i data-lucide="phone-call" class="w-4 h-4 absolute left-3 top-2.5 text-blue-300"></i>
-            <input type="text" id="topMyPhoneNumber" placeholder="Nhập SĐT Zalo của tôi..." class="w-full pl-9 pr-3 py-2 bg-white/10 text-white placeholder-blue-300/70 border border-blue-400/40 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 transition">
+          <div class="relative flex-1 sm:w-64">
+            <i id="iconTopPhone" data-lucide="phone-call" class="w-4 h-4 absolute left-3 top-2.5 text-blue-300"></i>
+            <input type="text" id="topMyPhoneNumber" placeholder="Nhập SĐT nhận cảnh báo Zalo..." class="w-full pl-9 pr-8 py-2 bg-white/10 text-white placeholder-blue-300/70 border border-blue-400/40 rounded-xl text-xs font-bold tracking-wide focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 transition">
+            <span id="lockIconInsideInput" class="absolute right-2.5 top-2.5 text-emerald-400 hidden" title="Số điện thoại đã được cố định">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </span>
           </div>
           <div class="flex items-center gap-2">
             <button onclick="saveTopPhoneNumber()" id="btnSaveTopPhone" class="flex-1 sm:flex-none px-3.5 py-2 bg-blue-500 hover:bg-blue-400 text-white text-xs font-bold rounded-xl shadow-md transition inline-flex items-center justify-center gap-1.5">
-              <i data-lucide="save" class="w-3.5 h-3.5"></i>
-              Lưu SĐT của tôi
+              <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+              <span>Cố định SĐT này</span>
             </button>
-            <button onclick="sendTestZaloToMe()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-md transition inline-flex items-center gap-1.5" title="Gửi tin nhắn thử nghiệm về Zalo của tôi">
+            <button onclick="unlockTopPhoneNumber()" id="btnChangeTopPhone" class="hidden flex-1 sm:flex-none px-3.5 py-2 bg-amber-500/90 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow-md transition items-center justify-center gap-1.5" title="Mở khóa để thay đổi sang số điện thoại khác">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Đổi SĐT khác</span>
+            </button>
+            <button onclick="sendTestZaloToMe()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-md transition inline-flex items-center gap-1.5" title="Gửi tin nhắn thử nghiệm tới SĐT cố định này">
               <i data-lucide="send" class="w-3.5 h-3.5"></i>
-              Gửi thử Zalo
+              <span>Gửi thử Zalo</span>
             </button>
           </div>
         </div>
@@ -200,13 +209,13 @@
       <!-- Quick status indicator -->
       <div class="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px]">
         <div class="flex items-center gap-2 text-blue-200">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Trạng thái: <strong id="lblMyPhoneStatus" class="text-white font-semibold">Chưa lưu SĐT</strong></span>
+          <span id="dotPhoneStatus" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span>Người nhận cảnh báo Zalo duy nhất: <strong id="lblMyPhoneStatus" class="text-white font-semibold">Chưa cố định SĐT</strong></span>
         </div>
         <div class="flex items-center gap-4">
           <label class="flex items-center gap-1.5 text-blue-200 hover:text-white cursor-pointer transition">
             <input type="checkbox" id="chkTopWeeklyReminder" onchange="toggleTopWeeklyReminder()" class="rounded border-blue-400 text-blue-600 focus:ring-blue-400 h-3.5 w-3.5">
-            <span>Tự động quét và nhắc nhở vào <strong>08h00 Thứ Hai hàng tuần</strong></span>
+            <span>Tự động quét và gửi cảnh báo về SĐT cố định vào <strong>08h00 Thứ Hai hàng tuần</strong></span>
           </label>
         </div>
       </div>
@@ -445,36 +454,34 @@
       </div>
 
       <div class="p-6 space-y-4 text-xs">
-        <!-- CHỌN ĐỐI TƯỢNG NHẬN NHẮC NHỞ -->
-        <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-200 space-y-2">
-          <label class="block font-bold text-blue-900">Mục đích gửi nhắc nhở:</label>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
-            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-blue-300 cursor-pointer hover:bg-blue-50/50 transition">
-              <input type="radio" name="zaloTargetMode" id="targetModeSelf" value="self" checked onchange="switchZaloRecipientMode('self')" class="text-blue-600 focus:ring-blue-500">
-              <div>
-                <strong class="text-blue-900 block text-[11px]">1. Nhắc nhở cho CHÍNH TÔI</strong>
-                <span class="text-[10px] text-slate-500">Nhắc việc để soạn Văn bản gửi đơn vị</span>
-              </div>
-            </label>
-            <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition">
-              <input type="radio" name="zaloTargetMode" id="targetModeCustomer" value="customer" onchange="switchZaloRecipientMode('customer')" class="text-blue-600 focus:ring-blue-500">
-              <div>
-                <strong class="text-slate-800 block text-[11px]">2. Gửi cho Khách hàng</strong>
-                <span class="text-[10px] text-slate-500">Đầu mối phụ trách trạm (Cột X)</span>
-              </div>
-            </label>
+        <!-- CHẾ ĐỘ CỐ ĐỊNH: CHỈ GỬI CHO SỐ ĐIỆN THOẠI ĐÃ THÊM ĐỂ CẢNH BÁO ZALO -->
+        <div class="p-3 bg-blue-50/80 rounded-xl border border-blue-200 flex items-start gap-2.5">
+          <div class="p-1.5 rounded-lg bg-blue-600 text-white shrink-0 mt-0.5">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+          </div>
+          <div class="space-y-0.5">
+            <strong class="text-blue-950 block text-xs">Chế độ gửi cố định (Chỉ gửi cho số điện thoại nhận cảnh báo Zalo)</strong>
+            <p class="text-[11px] text-blue-800/90 leading-relaxed">
+              Hệ thống khóa cố định người nhận là số điện thoại bạn đã đăng ký trên thanh cấu hình để nhắc việc làm văn bản (tuyệt đối không gửi sang số điện thoại khác).
+            </p>
           </div>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Số điện thoại Zalo người nhận:</label>
+          <label class="block font-semibold text-slate-700 mb-1 flex items-center justify-between">
+            <span>Số điện thoại Zalo nhận cảnh báo (Đã cố định):</span>
+            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              <i data-lucide="lock" class="w-3 h-3"></i> Cố định người nhận
+            </span>
+          </label>
           <div class="flex items-center gap-2">
-            <input type="text" id="zaloRecipientPhone" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-bold text-blue-900" placeholder="Số điện thoại Zalo nhận tin">
-            <button onclick="useManagerPhone()" class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold rounded-lg transition" title="Lấy SĐT của tôi">
-              SĐT của tôi
-            </button>
-            <button onclick="useCustomerPhone()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition" title="Lấy SĐT Khách hàng">
-              SĐT Khách hàng
+            <div class="relative flex-1">
+              <i data-lucide="lock" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+              <input type="text" id="zaloRecipientPhone" readonly class="w-full pl-8 pr-3 py-2 bg-slate-100 border border-slate-300 rounded-lg font-bold text-blue-900 cursor-not-allowed select-all focus:outline-none" placeholder="Chưa có SĐT cố định - vui lòng thêm ở thanh trên cùng">
+            </div>
+            <button type="button" onclick="closeModal('zaloModal'); unlockTopPhoneNumber();" class="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold rounded-lg transition inline-flex items-center gap-1" title="Đổi sang số điện thoại nhận cảnh báo khác">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Đổi SĐT khác</span>
             </button>
           </div>
         </div>
@@ -868,8 +875,15 @@
       }
 
       allPoints = res.data || [];
+      // Giữ cố định số điện thoại đã lưu ở LocalStorage, không để dữ liệu tải lại ghi đè mất số cố định
+      const localFixedPhone = (localStorage.getItem('my_zalo_phone') || '').trim();
       if (res.config) {
         currentConfig = Object.assign(currentConfig, res.config);
+      }
+      if (localFixedPhone) {
+        currentConfig.zaloManagerPhone = localFixedPhone;
+      } else if (currentConfig.zaloManagerPhone) {
+        localStorage.setItem('my_zalo_phone', currentConfig.zaloManagerPhone.trim());
       }
 
       initMyPhoneBar();
@@ -884,68 +898,162 @@
     }
 
     /**
-     * Khởi tạo thanh SĐT của Tôi từ LocalStorage hoặc ScriptProperties
+     * Lấy số điện thoại cố định duy nhất nhận cảnh báo Zalo
      */
-    function initMyPhoneBar() {
-      const savedPhone = localStorage.getItem('my_zalo_phone') || currentConfig.zaloManagerPhone || '';
+    function getFixedZaloPhone() {
+      return (localStorage.getItem('my_zalo_phone') || currentConfig.zaloManagerPhone || '').trim();
+    }
+
+    /**
+     * Thiết lập trạng thái Khóa cố định / Mở khóa cho ô nhập số điện thoại
+     */
+    function setPhoneLockedState(isLocked, phoneVal) {
       const topInput = document.getElementById('topMyPhoneNumber');
       const statusLbl = document.getElementById('lblMyPhoneStatus');
-      const chkWeekly = document.getElementById('chkTopWeeklyReminder');
+      const dotStatus = document.getElementById('dotPhoneStatus');
+      const badgeFixed = document.getElementById('badgeFixedPhone');
+      const lockInside = document.getElementById('lockIconInsideInput');
+      const btnSave = document.getElementById('btnSaveTopPhone');
+      const btnChange = document.getElementById('btnChangeTopPhone');
+      const modalPhoneInput = document.getElementById('zaloRecipientPhone');
 
-      if (topInput) topInput.value = savedPhone;
+      if (topInput && phoneVal !== undefined) {
+        topInput.value = phoneVal;
+      }
+      if (modalPhoneInput) {
+        modalPhoneInput.value = phoneVal || '';
+      }
+
+      if (isLocked && phoneVal) {
+        topInput.readOnly = true;
+        topInput.className = 'w-full pl-9 pr-8 py-2 bg-emerald-950/60 text-emerald-300 border-2 border-emerald-500/80 rounded-xl text-xs font-extrabold tracking-wider cursor-not-allowed select-all focus:outline-none transition';
+        if (lockInside) lockInside.classList.remove('hidden');
+        if (badgeFixed) {
+          badgeFixed.classList.remove('hidden');
+          badgeFixed.classList.add('inline-flex');
+        }
+        if (btnSave) {
+          btnSave.classList.add('hidden');
+          btnSave.classList.remove('inline-flex');
+        }
+        if (btnChange) {
+          btnChange.classList.remove('hidden');
+          btnChange.classList.add('inline-flex');
+        }
+        if (dotStatus) {
+          dotStatus.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+        }
+        if (statusLbl) {
+          statusLbl.innerHTML = `<span class="text-emerald-300 font-extrabold">${phoneVal}</span> <span class="text-blue-200">(Đã khóa cố định — Chỉ gửi cảnh báo Zalo duy nhất cho số này)</span>`;
+        }
+      } else {
+        topInput.readOnly = false;
+        topInput.className = 'w-full pl-9 pr-8 py-2 bg-white/15 text-white placeholder-blue-300/70 border-2 border-amber-400 rounded-xl text-xs font-bold tracking-wide focus:outline-none focus:ring-2 focus:ring-amber-300 focus:bg-white/20 transition';
+        if (lockInside) lockInside.classList.add('hidden');
+        if (badgeFixed) {
+          badgeFixed.classList.add('hidden');
+          badgeFixed.classList.remove('inline-flex');
+        }
+        if (btnSave) {
+          btnSave.classList.remove('hidden');
+          btnSave.classList.add('inline-flex');
+        }
+        if (btnChange) {
+          btnChange.classList.add('hidden');
+          btnChange.classList.remove('inline-flex');
+        }
+        if (dotStatus) {
+          dotStatus.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+        }
+        if (statusLbl) {
+          if (phoneVal) {
+            statusLbl.innerHTML = `<span class="text-amber-300 font-semibold">Đang mở khóa chỉnh sửa SĐT (Hãy bấm "Cố định SĐT này" sau khi nhập xong)</span>`;
+          } else {
+            statusLbl.innerHTML = `<span class="text-amber-300 font-semibold">Chưa có SĐT cố định (Hãy nhập SĐT nhận cảnh báo vào ô trên và bấm Cố định)</span>`;
+          }
+        }
+      }
+      lucide.createIcons();
+    }
+
+    /**
+     * Khởi tạo thanh SĐT cố định từ LocalStorage hoặc ScriptProperties
+     */
+    function initMyPhoneBar() {
+      const savedPhone = getFixedZaloPhone();
+      const chkWeekly = document.getElementById('chkTopWeeklyReminder');
       if (chkWeekly) chkWeekly.checked = !!currentConfig.enableAutoWeeklyZalo;
 
       if (savedPhone) {
-        statusLbl.innerHTML = `<span class="text-emerald-300 font-bold">${savedPhone}</span> (Sẵn sàng nhận tin cảnh báo làm VB)`;
+        setPhoneLockedState(true, savedPhone);
       } else {
-        statusLbl.innerHTML = `<span class="text-amber-300 font-semibold">Chưa lưu SĐT (Hãy nhập SĐT của bạn vào ô trên)</span>`;
+        setPhoneLockedState(false, '');
       }
     }
 
     /**
-     * Lưu nhanh SĐT người quản lý ngay từ thanh trên cùng
+     * Mở khóa để người dùng chủ động đổi sang số điện thoại khác
+     */
+    function unlockTopPhoneNumber() {
+      const currentPhone = getFixedZaloPhone();
+      setPhoneLockedState(false, currentPhone);
+      const topInput = document.getElementById('topMyPhoneNumber');
+      if (topInput) {
+        topInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          topInput.focus();
+          topInput.select();
+        }, 150);
+      }
+      showToast('Đã mở khóa! Bạn có thể nhập số điện thoại mới rồi bấm "Cố định SĐT này".', 'info');
+    }
+
+    /**
+     * Lưu và khóa cố định SĐT nhận cảnh báo Zalo ngay từ thanh trên cùng
      */
     function saveTopPhoneNumber() {
       const topInput = document.getElementById('topMyPhoneNumber');
       const phone = (topInput.value || '').trim();
-      const statusLbl = document.getElementById('lblMyPhoneStatus');
       const btn = document.getElementById('btnSaveTopPhone');
 
       if (!phone) {
-        showToast('Vui lòng nhập số điện thoại Zalo của bạn!', 'error');
+        showToast('Vui lòng nhập số điện thoại nhận cảnh báo Zalo để cố định!', 'error');
+        topInput.focus();
         return;
       }
 
+      // Lưu cố định vào LocalStorage và biến cấu hình
       localStorage.setItem('my_zalo_phone', phone);
       currentConfig.zaloManagerPhone = phone;
 
-      btn.disabled = true;
-      btn.innerHTML = `<div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></div> Đang lưu...`;
+      const cfgInput = document.getElementById('cfgZaloPhone');
+      if (cfgInput) cfgInput.value = phone;
 
-      statusLbl.innerHTML = `<span class="text-emerald-300 font-bold">${phone}</span> (Đã kích hoạt nhận cảnh báo làm VB)`;
+      btn.disabled = true;
+      btn.innerHTML = `<div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></div> Đang khóa cố định...`;
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(res => {
             btn.disabled = false;
-            btn.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Lưu SĐT của tôi`;
-            lucide.createIcons();
-            showToast(res.message || 'Đã lưu số điện thoại Zalo của bạn!', 'success');
+            btn.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5"></i> <span>Cố định SĐT này</span>`;
+            setPhoneLockedState(true, phone);
+            showToast(res.message || `Đã khóa cố định số điện thoại nhận cảnh báo Zalo: ${phone}`, 'success');
           })
           .withFailureHandler(err => {
             btn.disabled = false;
-            btn.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Lưu SĐT của tôi`;
-            lucide.createIcons();
-            showToast('Đã lưu cục bộ! (Lỗi đồng bộ Cloud: ' + err.toString() + ')', 'info');
+            btn.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5"></i> <span>Cố định SĐT này</span>`;
+            setPhoneLockedState(true, phone);
+            showToast(`Đã khóa cố định SĐT: ${phone} trên trình duyệt!`, 'info');
           })
           .saveMyPhoneNumber(phone, document.getElementById('chkTopWeeklyReminder').checked);
       } else {
         setTimeout(() => {
           btn.disabled = false;
-          btn.innerHTML = `<i data-lucide="save" class="w-3.5 h-3.5"></i> Lưu SĐT của tôi`;
-          lucide.createIcons();
-          showToast(`Đã lưu thành công SĐT Zalo của bạn: ${phone}`, 'success');
-        }, 400);
+          btn.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5"></i> <span>Cố định SĐT này</span>`;
+          setPhoneLockedState(true, phone);
+          showToast(`Đã khóa cố định SĐT nhận cảnh báo Zalo: ${phone} (Chỉ gửi tin nhắn cho số này)`, 'success');
+        }, 300);
       }
     }
 
@@ -955,28 +1063,29 @@
     function toggleTopWeeklyReminder() {
       const isChecked = document.getElementById('chkTopWeeklyReminder').checked;
       currentConfig.enableAutoWeeklyZalo = isChecked;
-      const phone = document.getElementById('topMyPhoneNumber').value.trim();
+      const phone = getFixedZaloPhone();
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run.saveMyPhoneNumber(phone, isChecked);
       }
-      showToast(isChecked ? 'Đã bật tự động nhắc nhở Zalo vào 08h00 Thứ Hai hàng tuần!' : 'Đã tắt tự động nhắc nhở hàng tuần.', 'info');
+      showToast(isChecked ? 'Đã bật tự động nhắc nhở Zalo vào 08h00 Thứ Hai hàng tuần tới SĐT cố định!' : 'Đã tắt tự động nhắc nhở hàng tuần.', 'info');
     }
 
     /**
-     * Gửi tin Zalo kiểm tra đến số của tôi
+     * Gửi tin Zalo kiểm tra chỉ tới số điện thoại đã cố định
      */
     function sendTestZaloToMe() {
-      const phone = document.getElementById('topMyPhoneNumber').value.trim();
+      const phone = getFixedZaloPhone();
       if (!phone) {
-        showToast('Vui lòng nhập và lưu SĐT Zalo của bạn trước!', 'error');
+        showToast('Vui lòng nhập và bấm "Cố định SĐT này" trước khi gửi thử!', 'error');
+        unlockTopPhoneNumber();
         return;
       }
 
-      const testMsg = `🔔 [TEST KẾT NỐI ZALO] Kênh cảnh báo kiểm định thiết bị đo đếm 110kV đã sẵn sàng!\nKhi thiết bị đến hạn kiểm định gần nhất (Cột Y) ≤ 6 tháng, hệ thống sẽ gửi tin nhắc nhở để bạn kịp thời làm Văn bản gửi khách hàng.`;
+      const testMsg = `🔔 [TEST CẢNH BÁO ZALO CỐ ĐỊNH] Hệ thống theo dõi hạn kiểm định trạm 110kV đã khóa cố định SĐT nhận cảnh báo là: ${phone}.\nMọi thông báo thiết bị sắp hết hạn (Cột Y ≤ 6 tháng) sẽ chỉ gửi duy nhất về số Zalo này.`;
       
       navigator.clipboard.writeText(testMsg).then(() => {
-        showToast('Đã copy tin nhắn thử nghiệm! Đang chuyển tiếp sang Zalo chat...', 'success');
+        showToast(`Đã copy tin nhắn thử nghiệm! Đang mở Zalo tới SĐT cố định ${phone}...`, 'success');
         const cleanPhone = phone.replace('+84', '0').replace(/[\s\.-]/g, '');
         window.open(`https://zalo.me/${cleanPhone}`, '_blank');
       });
@@ -1650,11 +1759,10 @@
 
     /**
      * =========================================================================
-     * MODAL LOGIC: ZALO REMINDER & SOẠN MẪU VĂN BẢN
+     * MODAL LOGIC: ZALO REMINDER & SOẠN MẪU VĂN BẢN (CHỈ GỬI CHO SĐT CỐ ĐỊNH)
      * =========================================================================
      */
     let currentModalPoint = null;
-    let currentModalTargetMode = 'self'; // 'self' hoặc 'customer'
 
     function openZaloModal(rowIndex) {
       const p = allPoints.find(item => item.rowIndex === rowIndex);
@@ -1663,88 +1771,55 @@
 
       document.getElementById('zaloModalSubtitle').textContent = `TBA: ${p.tenTba} | Điểm đo: ${p.tenDiemDo} (Mã: ${p.maDiemDo || '---'})`;
       
-      // Mặc định chọn chế độ Nhắc việc cho Chính tôi
-      document.getElementById('targetModeSelf').checked = true;
-      switchZaloRecipientMode('self');
+      // Luôn cố định gửi cho số điện thoại đã thêm để nhận cảnh báo Zalo
+      populateFixedZaloAlertModal();
 
       document.getElementById('zaloSendStatus').classList.add('hidden');
       openModal('zaloModal');
     }
 
     /**
-     * Chuyển đổi giữa 2 chế độ: Nhắc nhở cho Tôi vs Gửi cho Khách hàng
+     * Điền số điện thoại cố định duy nhất và soạn nội dung cảnh báo Zalo
      */
-    function switchZaloRecipientMode(mode) {
-      currentModalTargetMode = mode;
+    function populateFixedZaloAlertModal() {
       const p = currentModalPoint;
       if (!p) return;
 
-      const myPhone = localStorage.getItem('my_zalo_phone') || currentConfig.zaloManagerPhone || '';
+      const fixedPhone = getFixedZaloPhone();
       const phoneInput = document.getElementById('zaloRecipientPhone');
       const contentBox = document.getElementById('zaloMessageContent');
 
-      if (mode === 'self') {
-        phoneInput.value = myPhone;
-        // Soạn nội dung nhắc nhở CHÍNH TÔI làm văn bản
-        let msg = `🔔 [NHẮC VIỆC: SOẠN VĂN BẢN NHẮC NHỞ KIỂM ĐỊNH TRẠM 110kV]\n`;
-        msg += `🏢 Đơn vị/Trạm: ${p.tenTba}\n`;
-        msg += `📍 Điểm đo: ${p.tenDiemDo} (Mã: ${p.maDiemDo || 'Chính'})\n`;
-        msg += `------------------------------------\n`;
-        msg += `⚠️ HẠN CẢNH BÁO GẦN NHẤT (CỘT Y): ${p.ngayCanhBaoGanNhat || '---'}\n`;
-        if (p.monthsLeftColY !== null) {
-          if (p.monthsLeftColY < 0) {
-            msg += `🚨 TÌNH TRẠNG: ĐÃ QUÁ HẠN KIỂM ĐỊNH (${Math.abs(p.monthsLeftColY)} tháng) - CẦN SOẠN VB GẤP!\n`;
-          } else if (p.monthsLeftColY <= 6.0) {
-            msg += `🚨 TÌNH TRẠNG: CHỈ CÒN ${p.monthsLeftColY} THÁNG (≤ 6 tháng) - ĐẾN HẠN PHẢI GỬI VB NHẮC NHỞ!\n`;
-          } else {
-            msg += `ℹ️ Thời gian còn lại: ${p.monthsLeftColY} tháng\n`;
-          }
-        }
-        msg += `------------------------------------\n`;
-        msg += `⚡ CHI TIẾT THIẾT BỊ ĐO ĐẾM:\n`;
-        msg += `• Công tơ: SN ${p.congTo.serial || '---'} | Hạn KĐ: ${p.congTo.hanKd || '---'} (${p.congTo.conLai || ''})\n`;
-        msg += `• TU: SN ${p.tu.serial || '---'} | Hạn KĐ: ${p.tu.hanKd || '---'} (${p.tu.conLai || ''})\n`;
-        msg += `• TI: SN ${p.ti.serial || '---'} | Hạn KĐ: ${p.ti.hanKd || '---'} (${p.ti.conLai || ''})\n`;
-        if (p.hoSo.isMissing) {
-          msg += `📄 Hồ sơ pháp lý: CHƯA ĐẦY ĐỦ (${p.hoSo.chung || 'Thiếu CO, CQ, QĐ phê duyệt mẫu'})\n`;
-        }
-        if (p.lienHe) {
-          msg += `👤 Đầu mối liên hệ khách hàng: ${p.lienHe}\n`;
-        }
-        msg += `\n👉 Đề nghị đồng chí chuyên viên khẩn trương soạn thảo Văn bản đôn đốc gửi đơn vị khách hàng theo quy định TT 42/2015/TT-BCT và TT 39/2022/TT-BCT!`;
-        contentBox.value = msg;
-      } else {
-        phoneInput.value = p.phoneContact || '';
-        // Soạn nội dung gửi trực tiếp cho KHÁCH HÀNG
-        let msg = `⚠️ [CẢNH BÁO THỜI HẠN KIỂM ĐỊNH THIẾT BỊ ĐO ĐẾM 110kV]\n`;
-        msg += `Kính gửi: Quý Đơn vị / Trạm biến áp ${p.tenTba}\n`;
-        msg += `📍 Điểm đo: ${p.tenDiemDo} (Mã ĐĐ: ${p.maDiemDo || 'Chính'})\n`;
-        msg += `------------------------------------\n`;
-        msg += `Căn cứ theo dõi thời hạn kiểm định, thiết bị đo đếm tại trạm có hạn kiểm định gần nhất là ngày: ${p.ngayCanhBaoGanNhat || '---'}`;
-        if (p.monthsLeftColY !== null && p.monthsLeftColY <= 6.0) {
-          msg += ` (chỉ còn ${p.monthsLeftColY} tháng).\n`;
-        } else {
-          msg += `.\n`;
-        }
-        msg += `• Công tơ: SN ${p.congTo.serial || '---'} - Hạn KĐ: ${p.congTo.hanKd || '---'}\n`;
-        msg += `• TU: SN ${p.tu.serial || '---'} - Hạn KĐ: ${p.tu.hanKd || '---'}\n`;
-        msg += `• TI: SN ${p.ti.serial || '---'} - Hạn KĐ: ${p.ti.hanKd || '---'}\n`;
-        if (p.hoSo.isMissing) {
-          msg += `• Hồ sơ pháp lý: Đề nghị bổ sung CO, CQ, QĐ phê duyệt mẫu.\n`;
-        }
-        msg += `\nKính đề nghị Quý Đơn vị sớm lập phương án phối hợp kiểm định định kỳ theo quy định của Thông tư 42/2015/TT-BCT. Trân trọng cảm ơn!`;
-        contentBox.value = msg;
+      if (phoneInput) {
+        phoneInput.value = fixedPhone;
       }
-    }
 
-    function useManagerPhone() {
-      document.getElementById('targetModeSelf').checked = true;
-      switchZaloRecipientMode('self');
-    }
-
-    function useCustomerPhone() {
-      document.getElementById('targetModeCustomer').checked = true;
-      switchZaloRecipientMode('customer');
+      let msg = `🔔 [NHẮC VIỆC: SOẠN VĂN BẢN NHẮC NHỞ KIỂM ĐỊNH TRẠM 110kV]\n`;
+      msg += `🏢 Đơn vị/Trạm: ${p.tenTba}\n`;
+      msg += `📍 Điểm đo: ${p.tenDiemDo} (Mã: ${p.maDiemDo || 'Chính'})\n`;
+      msg += `------------------------------------\n`;
+      msg += `⚠️ HẠN CẢNH BÁO GẦN NHẤT (CỘT Y): ${p.ngayCanhBaoGanNhat || '---'}\n`;
+      if (p.monthsLeftColY !== null) {
+        if (p.monthsLeftColY < 0) {
+          msg += `🚨 TÌNH TRẠNG: ĐÃ QUÁ HẠN KIỂM ĐỊNH (${Math.abs(p.monthsLeftColY)} tháng) - CẦN SOẠN VB GẤP!\n`;
+        } else if (p.monthsLeftColY <= 6.0) {
+          msg += `🚨 TÌNH TRẠNG: CHỈ CÒN ${p.monthsLeftColY} THÁNG (≤ 6 tháng) - ĐẾN HẠN PHẢI GỬI VB NHẮC NHỞ!\n`;
+        } else {
+          msg += `ℹ️ Thời gian còn lại: ${p.monthsLeftColY} tháng\n`;
+        }
+      }
+      msg += `------------------------------------\n`;
+      msg += `⚡ CHI TIẾT THIẾT BỊ ĐO ĐẾM:\n`;
+      msg += `• Công tơ: SN ${p.congTo.serial || '---'} | Hạn KĐ: ${p.congTo.hanKd || '---'} (${p.congTo.conLai || ''})\n`;
+      msg += `• TU: SN ${p.tu.serial || '---'} | Hạn KĐ: ${p.tu.hanKd || '---'} (${p.tu.conLai || ''})\n`;
+      msg += `• TI: SN ${p.ti.serial || '---'} | Hạn KĐ: ${p.ti.hanKd || '---'} (${p.ti.conLai || ''})\n`;
+      if (p.hoSo.isMissing) {
+        msg += `📄 Hồ sơ pháp lý: CHƯA ĐẦY ĐỦ (${p.hoSo.chung || 'Thiếu CO, CQ, QĐ phê duyệt mẫu'})\n`;
+      }
+      if (p.lienHe) {
+        msg += `👤 Đầu mối liên hệ khách hàng: ${p.lienHe}\n`;
+      }
+      msg += `\n👉 Đề nghị đồng chí chuyên viên khẩn trương soạn thảo Văn bản đôn đốc gửi đơn vị khách hàng theo quy định TT 42/2015/TT-BCT và TT 39/2022/TT-BCT!`;
+      contentBox.value = msg;
     }
 
     /**
@@ -1790,23 +1865,32 @@
     }
 
     function openZaloMeChat() {
-      const phone = document.getElementById('zaloRecipientPhone').value.trim();
+      const phone = getFixedZaloPhone();
       copyZaloText();
       if (!phone) {
-        showToast('Vui lòng nhập hoặc kiểm tra số điện thoại người nhận!', 'error');
+        showToast('Chưa có SĐT nhận cảnh báo cố định! Vui lòng nhập SĐT và bấm "Cố định SĐT này" ở thanh trên cùng.', 'error');
+        closeModal('zaloModal');
+        unlockTopPhoneNumber();
         return;
       }
       const cleanPhone = phone.replace('+84', '0').replace(/[\s\.-]/g, '');
       const zaloUrl = `https://zalo.me/${cleanPhone}`;
       window.open(zaloUrl, '_blank');
-      showToast('Đang mở Zalo chat và đã copy nội dung để bạn dán (Ctrl+V) gửi ngay!', 'success');
+      showToast(`Đang mở Zalo chat tới SĐT cố định (${phone}) và đã copy nội dung để bạn dán gửi ngay!`, 'success');
     }
 
     function sendZaloViaWebhook() {
-      const phone = document.getElementById('zaloRecipientPhone').value.trim();
+      const phone = getFixedZaloPhone();
       const content = document.getElementById('zaloMessageContent').value;
       const statusBox = document.getElementById('zaloSendStatus');
       const btn = document.getElementById('btnSendWebhook');
+
+      if (!phone) {
+        statusBox.className = 'p-2.5 rounded-lg text-xs bg-red-50 text-red-800 border border-red-200 block';
+        statusBox.textContent = 'Chưa có số điện thoại nhận cảnh báo cố định! Vui lòng thêm và cố định số điện thoại ở thanh trên cùng trước.';
+        showToast('Vui lòng thêm và cố định số điện thoại nhận cảnh báo trước!', 'error');
+        return;
+      }
 
       if (!currentConfig.zaloWebhookUrl) {
         statusBox.className = 'p-2.5 rounded-lg text-xs bg-amber-50 text-amber-800 border border-amber-200 block';
@@ -1826,7 +1910,7 @@
             if (res.success) {
               statusBox.className = 'p-2.5 rounded-lg text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 block';
               statusBox.textContent = res.message;
-              showToast('Đã gửi tin nhắn Zalo thành công!', 'success');
+              showToast(`Đã gửi tin nhắn Zalo thành công tới SĐT cố định ${phone}!`, 'success');
             } else {
               statusBox.className = 'p-2.5 rounded-lg text-xs bg-red-50 text-red-800 border border-red-200 block';
               statusBox.textContent = res.message;
@@ -1846,7 +1930,7 @@
           btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> Gửi API Zalo Webhook`;
           lucide.createIcons();
           statusBox.className = 'p-2.5 rounded-lg text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 block';
-          statusBox.textContent = '(Mock) Đã gửi webhook thành công tới SĐT: ' + phone;
+          statusBox.textContent = '(Mock) Đã gửi webhook thành công duy nhất tới SĐT cố định: ' + phone;
         }, 800);
       }
     }
@@ -2137,9 +2221,9 @@
      * =========================================================================
      */
     function openSettingsModal() {
-      document.getElementById('cfgZaloPhone').value = currentConfig.zaloManagerPhone || '';
+      document.getElementById('cfgZaloPhone').value = getFixedZaloPhone();
       document.getElementById('cfgZaloWebhook').value = currentConfig.zaloWebhookUrl || '';
-      document.getElementById('cfgAlertMonths').value = currentConfig.alertThresholdMonths || '13';
+      document.getElementById('cfgAlertMonths').value = currentConfig.alertThresholdMonths || '6';
       document.getElementById('cfgEnableWeekly').checked = !!currentConfig.enableAutoWeeklyZalo;
       document.getElementById('cfgSheetId').value = currentConfig.spreadsheetId || '';
       document.getElementById('cfgDriveFolderId').value = currentConfig.driveFolderId || '';
@@ -2156,14 +2240,22 @@
       btn.disabled = true;
       btn.innerHTML = `<div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></div> Đang lưu...`;
 
+      const rawPhone = (document.getElementById('cfgZaloPhone').value || '').trim().replace(/\s+/g, '');
+      const finalPhone = rawPhone || getFixedZaloPhone();
+
       const cfgPayload = {
-        zaloManagerPhone: document.getElementById('cfgZaloPhone').value,
+        zaloManagerPhone: finalPhone,
         zaloWebhookUrl: document.getElementById('cfgZaloWebhook').value,
         alertThresholdMonths: parseInt(document.getElementById('cfgAlertMonths').value, 10),
         enableAutoWeeklyZalo: document.getElementById('cfgEnableWeekly').checked,
         spreadsheetId: document.getElementById('cfgSheetId').value,
         driveFolderId: document.getElementById('cfgDriveFolderId').value
       };
+
+      if (finalPhone) {
+        localStorage.setItem('my_zalo_phone', finalPhone);
+      }
+      localStorage.setItem('my_zalo_weekly', cfgPayload.enableAutoWeeklyZalo ? 'true' : 'false');
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
@@ -2173,6 +2265,7 @@
             lucide.createIcons();
             if (res.success) {
               currentConfig = Object.assign(currentConfig, cfgPayload);
+              initMyPhoneBar();
               statusBox.className = 'p-2.5 rounded-lg text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 block';
               statusBox.textContent = res.message;
               showToast('Lưu cấu hình hệ thống thành công!', 'success');
@@ -2198,10 +2291,14 @@
           btn.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Lưu Cài Đặt`;
           lucide.createIcons();
           currentConfig = Object.assign(currentConfig, cfgPayload);
+          initMyPhoneBar();
           statusBox.className = 'p-2.5 rounded-lg text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 block';
-          statusBox.textContent = '(Mock) Đã lưu cấu hình!';
-          showToast('Mô phỏng lưu cấu hình thành công!', 'success');
-        }, 500);
+          statusBox.textContent = 'Đã lưu cấu hình cố định!';
+          showToast('Đã lưu cấu hình hệ thống & cố định SĐT!', 'success');
+          setTimeout(() => {
+            closeModal('settingsModal');
+          }, 900);
+        }, 400);
       }
     }
 

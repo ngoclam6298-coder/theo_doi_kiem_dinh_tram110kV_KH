@@ -69,13 +69,16 @@ function saveConfig(configData) {
 }
 
 /**
- * Lưu nhanh số điện thoại của người quản lý từ ô nhập trực tiếp trên giao diện
+ * Lưu cố định số điện thoại của người nhận cảnh báo Zalo từ ô nhập trực tiếp trên giao diện
+ * Chỉ thay đổi khi người dùng chủ động cập nhật số điện thoại khác
  */
 function saveMyPhoneNumber(phone, enableWeekly) {
   try {
     const props = PropertiesService.getScriptProperties();
     const cleanPhone = (phone || '').trim();
-    props.setProperty('ZALO_MANAGER_PHONE', cleanPhone);
+    if (cleanPhone) {
+      props.setProperty('ZALO_MANAGER_PHONE', cleanPhone);
+    }
     if (enableWeekly !== undefined) {
       props.setProperty('ENABLE_WEEKLY_ZALO', enableWeekly ? 'true' : 'false');
       if (enableWeekly) {
@@ -84,7 +87,7 @@ function saveMyPhoneNumber(phone, enableWeekly) {
         removeWeeklyTrigger();
       }
     }
-    return { success: true, message: 'Đã lưu số điện thoại Zalo của bạn (' + cleanPhone + ') để nhận thông báo làm văn bản!' };
+    return { success: true, message: 'Đã khóa cố định số điện thoại nhận cảnh báo Zalo (' + cleanPhone + ')!' };
   } catch (err) {
     return { success: false, message: 'Lỗi lưu SĐT: ' + err.toString() };
   }
@@ -782,6 +785,7 @@ function buildZaloMessageContent(point) {
 
 /**
  * Gửi tin nhắn qua Webhook Zalo đã cấu hình
+ * CHỈ GỬI DUY NHẤT ĐẾN SỐ ĐIỆN THOẠI ĐÃ CỐ ĐỊNH ĐỂ CẢNH BÁO ZALO
  */
 function sendZaloWebhook(phoneNumber, messageContent) {
   const config = getConfig();
@@ -789,9 +793,15 @@ function sendZaloWebhook(phoneNumber, messageContent) {
     return { success: false, message: 'Chưa cấu hình URL Webhook Zalo trong phần Cài đặt!' };
   }
 
+  // Luôn ưu tiên và khóa chặt vào số điện thoại cố định đã thêm để nhận cảnh báo Zalo
+  const targetPhone = (config.zaloManagerPhone || phoneNumber || '').trim();
+  if (!targetPhone) {
+    return { success: false, message: 'Chưa có số điện thoại cố định nhận cảnh báo Zalo! Vui lòng thêm số điện thoại trước.' };
+  }
+
   try {
     const payload = {
-      phone: phoneNumber || config.zaloManagerPhone,
+      phone: targetPhone,
       message: messageContent,
       timestamp: new Date().toISOString()
     };
