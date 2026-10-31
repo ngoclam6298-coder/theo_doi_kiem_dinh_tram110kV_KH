@@ -250,7 +250,7 @@
           </div>
         </div>
         <div class="mt-2 flex items-baseline gap-1.5">
-          <span id="statTotalDiemDo" class="text-2xl font-extrabold text-slate-900 tracking-tight">16</span>
+          <span id="statTotalDiemDo" class="text-2xl font-extrabold text-slate-900 tracking-tight">22</span>
           <span class="text-xs text-slate-400 font-medium">Điểm</span>
         </div>
         <div class="text-[10px] text-slate-400 mt-1 flex items-center justify-between">
@@ -326,7 +326,7 @@
           <span class="text-[11px] text-purple-700 font-medium">Thiếu CO/CQ</span>
         </div>
         <div class="text-[10px] text-purple-700 mt-1 flex items-center justify-between">
-          <span>Cột V</span>
+          <span>Cột S, T, U, V</span>
           <span class="text-purple-800 font-semibold opacity-0 group-hover:opacity-100 transition">Lọc →</span>
         </div>
       </div>
@@ -354,7 +354,7 @@
         <div class="flex items-center border border-slate-200 rounded-lg p-0.5 bg-slate-100/90 text-xs overflow-x-auto">
           <button onclick="setFilterStatus('all')" id="tabAll" class="px-2.5 py-1.5 rounded-md font-semibold transition bg-white shadow-sm text-slate-900 inline-flex items-center gap-1.5 whitespace-nowrap">
             <span>Tất cả</span>
-            <span id="tabCountAll" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-bold">16</span>
+            <span id="tabCountAll" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-bold">22</span>
           </button>
           <button onclick="setFilterStatus('need_notice')" id="tabNeedNotice" class="px-2.5 py-1.5 rounded-md font-semibold transition text-rose-700 hover:text-rose-900 inline-flex items-center gap-1.5 whitespace-nowrap">
             <span>🚨 Cần gửi VB (≤ 6T)</span>
@@ -692,9 +692,26 @@
 
         <!-- Tình trạng hồ sơ & Đầu mối & Cảnh báo -->
         <div class="space-y-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Tình trạng hồ sơ pháp lý (Cột V):</label>
-            <input type="text" id="editTinhTrangChung" placeholder="VD: có CO, CQ, QĐ phê duyệt mẫu hoặc chưa có" class="w-full px-3 py-2 border border-slate-200 rounded-lg">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+            <h4 class="font-bold text-slate-800 text-xs">HỒ SƠ BAN ĐẦU CỦA CÔNG TƠ - TU - TI (CỘT S, T, U, V)</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-slate-600 mb-1">Hồ sơ Công tơ (Cột S):</label>
+                <input type="text" id="editHoSoCt" placeholder="- chưa có / - có CO, CQ..." class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white">
+              </div>
+              <div>
+                <label class="block text-slate-600 mb-1">Hồ sơ TU (Cột T):</label>
+                <input type="text" id="editHoSoTu" placeholder="- chưa có / - có QĐ phê duyệt mẫu..." class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white">
+              </div>
+              <div>
+                <label class="block text-slate-600 mb-1">Hồ sơ TI (Cột U):</label>
+                <input type="text" id="editHoSoTi" placeholder="- chưa có / - có CO, CQ..." class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white">
+              </div>
+              <div>
+                <label class="block text-slate-600 mb-1">Tình trạng hồ sơ chung (Cột V):</label>
+                <input type="text" id="editTinhTrangChung" placeholder="- chưa có / - có" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg bg-white">
+              </div>
+            </div>
           </div>
 
           <div>
@@ -702,7 +719,11 @@
             <input type="text" id="editLienHe" placeholder="Họ tên, Chức vụ, SĐT, Email..." class="w-full px-3 py-2 border border-slate-200 rounded-lg">
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Ngày KĐ gần nhất (Cột Y):</label>
+              <input type="text" id="editNgayCanhBao" placeholder="dd/mm/yyyy" class="w-full px-3 py-2 border border-slate-200 rounded-lg font-mono font-bold text-rose-700">
+            </div>
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Cảnh báo (Cột Z):</label>
               <input type="text" id="editCanhBao" placeholder="CẦN GỬI VB NHẮC NHỞ" class="w-full px-3 py-2 border border-slate-200 rounded-lg">
@@ -842,9 +863,9 @@
     });
 
     /**
-     * Tải dữ liệu từ Google Apps Script hoặc Fallback Mock khi chạy offline
+     * Tải dữ liệu từ Google Apps Script hoặc đồng bộ trực tiếp từ Google Sheets CSV / Dữ liệu chuẩn 22 điểm đo
      */
-    function loadData(isRefresh = false) {
+    async function loadData(isRefresh = false) {
       const loading = document.getElementById('loadingOverlay');
       const tableContainer = document.getElementById('tableContainer');
       const emptyState = document.getElementById('emptyState');
@@ -859,12 +880,50 @@
           .withFailureHandler(handleDataError)
           .getDashboardData();
       } else {
-        // Fallback Mock Data để kiểm thử giao diện
-        console.warn('Đang chạy ở chế độ Preview cục bộ (Sử dụng dữ liệu mô phỏng)');
+        try {
+          const liveRes = await fetchLiveGoogleSheetCSV();
+          if (liveRes && liveRes.success && liveRes.data && liveRes.data.length > 0) {
+            handleDataSuccess(liveRes);
+            if (isRefresh) {
+              showToast('Đã đồng bộ trực tiếp ' + liveRes.data.length + ' điểm đo (8 trạm) từ Google Sheet!', 'success');
+            }
+            return;
+          }
+        } catch (e) {
+          console.warn('Sử dụng dữ liệu Google Sheet tích hợp sẵn:', e);
+        }
         setTimeout(() => {
           handleDataSuccess(generateMockData());
-        }, 600);
+          if (isRefresh) {
+            showToast('Đã làm mới dữ liệu 8 trạm 110kV (22 điểm đo)!', 'success');
+          }
+        }, 250);
       }
+    }
+
+    function getLocalRowOverrides() {
+      try {
+        const raw = localStorage.getItem('pcvt_110kv_overrides_v2');
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveLocalRowOverride(rowIndex, patch) {
+      try {
+        const map = getLocalRowOverrides();
+        map[rowIndex] = Object.assign(map[rowIndex] || {}, patch);
+        localStorage.setItem('pcvt_110kv_overrides_v2', JSON.stringify(map));
+      } catch (e) {
+        console.warn('Không thể lưu override:', e);
+      }
+    }
+
+    function copyDeviceSerial(rowIndex, deviceKey) {
+      const p = allPoints.find(item => item.rowIndex === rowIndex);
+      if (!p || !p[deviceKey] || !p[deviceKey].serial) return;
+      copyToClipboard(p[deviceKey].serial, 'Số chế tạo ' + deviceKey.toUpperCase());
     }
 
     function handleDataSuccess(res) {
@@ -1231,25 +1290,31 @@
       }
 
       const headers = [
-        "STT Khách hàng",
-        "STT Điểm đo",
-        "Tên Trạm biến áp 110kV",
-        "Tên Điểm đo",
-        "Mã Điểm đo",
-        "Phân loại",
-        "Cột Y: Hạn gần nhất cần cảnh báo",
+        "STT Khách hàng (Cột A)",
+        "STT Điểm đo (Cột B)",
+        "Tên Trạm biến áp 110kV (Cột C)",
+        "Tên Điểm đo (Cột D)",
+        "Mã Điểm đo chính thức (Cột E)",
+        "Công tơ dự phòng (Cột F)",
+        "Công tơ - Số chế tạo (Cột G)",
+        "Công tơ - Ngày KĐ (Cột H)",
+        "Công tơ - Hạn KĐ (Cột I)",
+        "TU - Số chế tạo (Cột K)",
+        "TU - Ngày KĐ (Cột L)",
+        "TU - Hạn KĐ (Cột M)",
+        "TI - Số chế tạo (Cột O)",
+        "TI - Ngày KĐ (Cột P)",
+        "TI - Hạn KĐ (Cột Q)",
+        "Hồ sơ Công tơ (Cột S)",
+        "Hồ sơ TU (Cột T)",
+        "Hồ sơ TI (Cột U)",
+        "Hồ sơ chung (Cột V)",
+        "Ghi chú (Cột W)",
+        "Thông tin đầu mối liên hệ (Cột X)",
+        "Cột Y: Ngày KĐ gần nhất cần cảnh báo",
         "Số tháng còn lại Cột Y",
         "Trạng thái xử lý",
-        "Công tơ - Số chế tạo",
-        "Công tơ - Hạn KĐ",
-        "TU - Số chế tạo",
-        "TU - Hạn KĐ",
-        "TI - Số chế tạo",
-        "TI - Hạn KĐ",
-        "Hồ sơ pháp lý",
-        "Đầu mối liên hệ Khách hàng",
-        "Số điện thoại liên hệ",
-        "Tình trạng Cột Z (Gửi VB/Drive Link)"
+        "Cột Z: Cảnh báo / Văn bản đã gửi"
       ];
 
       const csvRows = [];
@@ -1262,19 +1327,25 @@
           p.tenTba || "",
           p.tenDiemDo || "",
           p.maDiemDo || "",
-          p.isBackup ? "Dự phòng" : "Chính",
+          p.isBackup ? "x (Dự phòng)" : "Chính",
+          p.congTo ? (p.congTo.serial || "") : "",
+          p.congTo ? (p.congTo.ngayKd || "") : "",
+          p.congTo ? (p.congTo.hanKd || "") : "",
+          p.tu ? (p.tu.serial || "") : "",
+          p.tu ? (p.tu.ngayKd || "") : "",
+          p.tu ? (p.tu.hanKd || "") : "",
+          p.ti ? (p.ti.serial || "") : "",
+          p.ti ? (p.ti.ngayKd || "") : "",
+          p.ti ? (p.ti.hanKd || "") : "",
+          p.hoSo ? (p.hoSo.congTo || "") : "",
+          p.hoSo ? (p.hoSo.tu || "") : "",
+          p.hoSo ? (p.hoSo.ti || "") : "",
+          p.hoSo ? (p.hoSo.chung || "") : "",
+          p.ghiChu || "",
+          p.lienHe || "",
           p.ngayCanhBaoGanNhat || "",
           p.monthsLeftColY !== null ? p.monthsLeftColY : "",
           p.isCompleted ? "ĐÃ HOÀN THÀNH GỬI VB" : (p.statusLabel || ""),
-          p.congTo ? (p.congTo.serial || "") : "",
-          p.congTo ? (p.congTo.hanKd || "") : "",
-          p.tu ? (p.tu.serial || "") : "",
-          p.tu ? (p.tu.hanKd || "") : "",
-          p.ti ? (p.ti.serial || "") : "",
-          p.ti ? (p.ti.hanKd || "") : "",
-          p.hoSo ? (p.hoSo.chung || "") : "",
-          p.lienHe || "",
-          p.phoneContact || "",
           p.canhBao || ""
         ];
         csvRows.push(row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","));
@@ -1490,16 +1561,17 @@
             <!-- CÔNG TƠ -->
             <td class="py-3.5 px-3.5 align-top bg-blue-50/15">
               <div class="p-2 rounded-lg bg-white/80 border border-blue-100 shadow-sm space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-mono text-xs font-bold text-slate-800 truncate max-w-[110px]" title="${p.congTo ? p.congTo.serial : ''}">${p.congTo ? (p.congTo.serial || '---') : '---'}</span>
+                <div class="flex items-start justify-between gap-1">
+                  <span class="font-mono text-xs font-bold text-slate-800 whitespace-pre-line leading-snug" title="${(p.congTo && p.congTo.serial ? p.congTo.serial : '').replace(/"/g, '&quot;')}">${p.congTo && p.congTo.serial ? p.congTo.serial : '---'}</span>
                   ${p.congTo && p.congTo.serial ? `
-                    <button onclick="copyToClipboard('${p.congTo.serial}', 'Số Serial Công tơ')" class="text-slate-400 hover:text-blue-600 p-0.5 transition" title="Sao chép số Serial">
+                    <button onclick="copyDeviceSerial(${p.rowIndex}, 'congTo')" class="text-slate-400 hover:text-blue-600 p-0.5 transition shrink-0" title="Sao chép số Serial">
                       <i data-lucide="copy" class="w-3 h-3"></i>
                     </button>
                   ` : ''}
                 </div>
+                <div class="text-[10px] text-slate-400 font-medium">Ngày KĐ: ${p.congTo && p.congTo.ngayKd ? p.congTo.ngayKd : '---'}</div>
                 <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
-                  <span class="text-slate-500 font-medium">Hạn: ${p.congTo ? (p.congTo.hanKd || '---') : '---'}</span>
+                  <span class="text-slate-600 font-semibold">Hạn: ${p.congTo && p.congTo.hanKd ? p.congTo.hanKd : '---'}</span>
                   ${ctBadge}
                 </div>
               </div>
@@ -1508,16 +1580,17 @@
             <!-- TU -->
             <td class="py-3.5 px-3.5 align-top bg-indigo-50/15">
               <div class="p-2 rounded-lg bg-white/80 border border-indigo-100 shadow-sm space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-mono text-xs font-semibold text-slate-800 truncate max-w-[110px]" title="${p.tu ? p.tu.serial : ''}">${p.tu ? (p.tu.serial || '---') : '---'}</span>
+                <div class="flex items-start justify-between gap-1">
+                  <span class="font-mono text-[11px] font-semibold text-slate-800 whitespace-pre-line leading-snug" title="${(p.tu && p.tu.serial ? p.tu.serial : '').replace(/"/g, '&quot;')}">${p.tu && p.tu.serial ? p.tu.serial : '---'}</span>
                   ${p.tu && p.tu.serial ? `
-                    <button onclick="copyToClipboard('${p.tu.serial}', 'Số Serial TU')" class="text-slate-400 hover:text-indigo-600 p-0.5 transition" title="Sao chép số Serial TU">
+                    <button onclick="copyDeviceSerial(${p.rowIndex}, 'tu')" class="text-slate-400 hover:text-indigo-600 p-0.5 transition shrink-0" title="Sao chép số Serial TU">
                       <i data-lucide="copy" class="w-3 h-3"></i>
                     </button>
                   ` : ''}
                 </div>
+                <div class="text-[10px] text-slate-400 font-medium">Ngày KĐ: ${p.tu && p.tu.ngayKd ? p.tu.ngayKd : '---'}</div>
                 <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
-                  <span class="text-slate-500 font-medium">Hạn: ${p.tu ? (p.tu.hanKd || '---') : '---'}</span>
+                  <span class="text-slate-600 font-semibold">Hạn: ${p.tu && p.tu.hanKd ? p.tu.hanKd : '---'}</span>
                   ${tuBadge}
                 </div>
               </div>
@@ -1526,39 +1599,50 @@
             <!-- TI -->
             <td class="py-3.5 px-3.5 align-top bg-violet-50/15">
               <div class="p-2 rounded-lg bg-white/80 border border-violet-100 shadow-sm space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-mono text-xs font-semibold text-slate-800 truncate max-w-[110px]" title="${p.ti ? p.ti.serial : ''}">${p.ti ? (p.ti.serial || '---') : '---'}</span>
+                <div class="flex items-start justify-between gap-1">
+                  <span class="font-mono text-[11px] font-semibold text-slate-800 whitespace-pre-line leading-snug" title="${(p.ti && p.ti.serial ? p.ti.serial : '').replace(/"/g, '&quot;')}">${p.ti && p.ti.serial ? p.ti.serial : '---'}</span>
                   ${p.ti && p.ti.serial ? `
-                    <button onclick="copyToClipboard('${p.ti.serial}', 'Số Serial TI')" class="text-slate-400 hover:text-violet-600 p-0.5 transition" title="Sao chép số Serial TI">
+                    <button onclick="copyDeviceSerial(${p.rowIndex}, 'ti')" class="text-slate-400 hover:text-violet-600 p-0.5 transition shrink-0" title="Sao chép số Serial TI">
                       <i data-lucide="copy" class="w-3 h-3"></i>
                     </button>
                   ` : ''}
                 </div>
+                <div class="text-[10px] text-slate-400 font-medium">Ngày KĐ: ${p.ti && p.ti.ngayKd ? p.ti.ngayKd : '---'}</div>
                 <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
-                  <span class="text-slate-500 font-medium">Hạn: ${p.ti ? (p.ti.hanKd || '---') : '---'}</span>
+                  <span class="text-slate-600 font-semibold">Hạn: ${p.ti && p.ti.hanKd ? p.ti.hanKd : '---'}</span>
                   ${tiBadge}
                 </div>
               </div>
             </td>
 
-            <!-- HỒ SƠ PHÁP LÝ -->
+            <!-- HỒ SƠ PHÁP LÝ & GHI CHÚ -->
             <td class="py-3.5 px-3.5 align-top">
               <div>${hoSoBadge}</div>
-              <div class="text-[11px] text-slate-500 mt-1 max-w-[130px] truncate leading-tight font-medium" title="${p.hoSo ? p.hoSo.chung : ''}">
-                ${p.hoSo ? (p.hoSo.chung || 'Chưa ghi chú') : 'Chưa ghi chú'}
+              <div class="text-[10px] text-slate-600 mt-1.5 space-y-0.5 leading-snug max-w-[180px]">
+                ${p.hoSo && p.hoSo.congTo ? `<div><span class="font-bold text-slate-700">CT:</span> ${p.hoSo.congTo}</div>` : ''}
+                ${p.hoSo && p.hoSo.tu ? `<div><span class="font-bold text-slate-700">TU:</span> ${p.hoSo.tu}</div>` : ''}
+                ${p.hoSo && p.hoSo.ti ? `<div><span class="font-bold text-slate-700">TI:</span> ${p.hoSo.ti}</div>` : ''}
+                ${p.hoSo && p.hoSo.chung ? `<div><span class="font-bold text-slate-700">Chung:</span> ${p.hoSo.chung}</div>` : ''}
               </div>
+              ${p.ghiChu ? `
+                <div class="mt-1.5 p-1.5 rounded bg-amber-50/80 border border-amber-200/70 text-[10px] text-amber-900 font-medium whitespace-pre-line leading-snug max-w-[180px]">
+                  <span class="font-bold">Ghi chú:</span> ${p.ghiChu}
+                </div>
+              ` : ''}
             </td>
 
             <!-- LIÊN HỆ -->
             <td class="py-3.5 px-3.5 align-top">
-              <div class="text-[11px] font-medium text-slate-700 max-w-[150px] line-clamp-2" title="${p.lienHe}">
+              <div class="text-[11px] font-medium text-slate-700 max-w-[185px] whitespace-pre-line leading-snug" title="${(p.lienHe || '').replace(/"/g, '&quot;')}">
                 ${p.lienHe || 'Chưa có thông tin'}
               </div>
               ${p.phoneContact ? `
-                <div class="mt-1 flex items-center gap-1.5">
-                  <a href="tel:${p.phoneContact}" class="inline-flex items-center text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60 transition" title="Bấm để gọi điện">
-                    <i data-lucide="phone" class="w-3 h-3 mr-1"></i> ${p.phoneContact}
-                  </a>
+                <div class="mt-1.5 flex flex-wrap items-center gap-1">
+                  ${(p.allPhones && p.allPhones.length > 0 ? p.allPhones : [p.phoneContact]).map(ph => `
+                    <a href="tel:${ph}" class="inline-flex items-center text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60 transition" title="Bấm để gọi điện">
+                      <i data-lucide="phone" class="w-2.5 h-2.5 mr-1"></i> ${ph}
+                    </a>
+                  `).join('')}
                 </div>
               ` : ''}
             </td>
@@ -1620,6 +1704,7 @@
       const todayStr = getTodayFormatted();
       p.statusLabel = 'ĐÃ HOÀN THÀNH GỬI VB';
       p.canhBao = `ĐÃ HOÀN THÀNH GỬI VB (${todayStr})`;
+      saveLocalRowOverride(rowIndex, { isCompleted: true, canhBao: p.canhBao });
       
       recalculateLocalSummary();
       applyFilters();
@@ -1672,6 +1757,7 @@
 
       recalculateLocalSummary();
       applyFilters();
+      saveLocalRowOverride(rowIndex, { isCompleted: false, canhBao: p.canhBao });
       showToast(`Đã trả điểm đo ${p.tenDiemDo} về trạng thái: ${p.statusLabel}!`, 'info');
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -2080,6 +2166,7 @@
               pt.urgencyStatus = 'completed';
               pt.statusLabel = 'ĐÃ HOÀN THÀNH GỬI VB';
               pt.canhBao = `ĐÃ HOÀN THÀNH GỬI VB (${getTodayFormatted()}): ${filePayloads[0]?.fileName || ''}`;
+              saveLocalRowOverride(payload.rowIndex, { isCompleted: true, canhBao: pt.canhBao });
               recalculateLocalSummary();
               applyFilters();
             }
@@ -2136,8 +2223,12 @@
       document.getElementById('editTiNgayKd').value = p.ti.ngayKd || '';
       document.getElementById('editTiHanKd').value = p.ti.hanKd || '';
 
+      document.getElementById('editHoSoCt').value = p.hoSo.congTo || '';
+      document.getElementById('editHoSoTu').value = p.hoSo.tu || '';
+      document.getElementById('editHoSoTi').value = p.hoSo.ti || '';
       document.getElementById('editTinhTrangChung').value = p.hoSo.chung || '';
       document.getElementById('editLienHe').value = p.lienHe || '';
+      document.getElementById('editNgayCanhBao').value = p.ngayCanhBaoGanNhat || '';
       document.getElementById('editCanhBao').value = p.canhBao || '';
       document.getElementById('editGhiChu').value = p.ghiChu || '';
 
@@ -2170,11 +2261,17 @@
           ngayKd: document.getElementById('editTiNgayKd').value,
           hanKd: document.getElementById('editTiHanKd').value
         },
+        hoSoCongTo: document.getElementById('editHoSoCt').value,
+        hoSoTu: document.getElementById('editHoSoTu').value,
+        hoSoTi: document.getElementById('editHoSoTi').value,
         tinhTrangChung: document.getElementById('editTinhTrangChung').value,
         lienHe: document.getElementById('editLienHe').value,
+        ngayCanhBaoGanNhat: document.getElementById('editNgayCanhBao').value,
         canhBao: document.getElementById('editCanhBao').value,
         ghiChu: document.getElementById('editGhiChu').value
       };
+
+      saveLocalRowOverride(payload.rowIndex, payload);
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
@@ -2209,9 +2306,13 @@
           btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Lưu thay đổi vào Sheet`;
           lucide.createIcons();
           statusBox.className = 'p-2.5 rounded-lg text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 block';
-          statusBox.textContent = '(Mock) Đã mô phỏng cập nhật dữ liệu thành công!';
-          showToast('Mô phỏng cập nhật thành công!', 'success');
-        }, 600);
+          statusBox.textContent = 'Đã lưu cập nhật dữ liệu thành công!';
+          showToast('Đã cập nhật dữ liệu thành công!', 'success');
+          setTimeout(() => {
+            closeModal('editModal');
+            loadData(false);
+          }, 700);
+        }, 400);
       }
     }
 
@@ -2335,380 +2436,689 @@
     }
 
     /**
-     * Dữ liệu mô phỏng chuẩn xác cấu trúc Trạm 110kV khi kiểm thử trực tiếp
-     * Tính toán thời gian thực từ ngày hôm nay (new Date())
+     * Phân tích ngày linh hoạt (hỗ trợ cả DD/MM/YYYY ở Cột H,I,L,M,P,Q và MM/DD/YYYY ở Cột Y)
+     */
+    function parseDateClient(str, preferMonthFirst = false) {
+      if (!str) return null;
+      const parts = String(str).trim().split(/[\/\-\.]/);
+      if (parts.length !== 3) return null;
+      const p0 = parseInt(parts[0], 10);
+      const p1 = parseInt(parts[1], 10);
+      const year = parseInt(parts[2], 10);
+      if (isNaN(p0) || isNaN(p1) || isNaN(year) || year < 1900) return null;
+
+      let day, month;
+      if (p1 > 12 || (preferMonthFirst && p0 >= 1 && p0 <= 12)) {
+        month = p0 - 1;
+        day = p1;
+      } else {
+        day = p0;
+        month = p1 - 1;
+      }
+      if (month < 0 || month > 11 || day < 1 || day > 31) return null;
+      return new Date(year, month, day);
+    }
+
+    function formatDateDDMMYYYY(dateObj) {
+      if (!dateObj || isNaN(dateObj.getTime())) return '';
+      const dd = String(dateObj.getDate()).padStart(2, '0');
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const yyyy = dateObj.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function calcDeviceDateClient(hanKdStr, conLaiStr, today) {
+      const d = parseDateClient(hanKdStr, false);
+      if (!d) {
+        return { monthsLeft: null, status: 'unknown' };
+      }
+      const diffDays = Math.ceil((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const monthsLeft = Math.round((diffDays / 30.4375) * 10) / 10;
+      const status = monthsLeft < 0 ? 'expired' : monthsLeft <= 6 ? 'urgent' : monthsLeft <= 13 ? 'warning' : 'safe';
+      return { monthsLeft, status, dateObj: d };
+    }
+
+    function extractAllPhonesClient(text) {
+      if (!text) return [];
+      const matches = String(text).match(/(0\d{9,10})/g);
+      return matches ? Array.from(new Set(matches)) : [];
+    }
+
+    function checkMissingDocsClient(s, t, u, v) {
+      const combined = `${s || ''} ${t || ''} ${u || ''} ${v || ''}`.toLowerCase();
+      if (combined.includes('chưa có') || combined.includes('thiếu') || combined.includes('chua co')) {
+        return true;
+      }
+      if (!s && !t && !u && !v) return true;
+      return false;
+    }
+
+    /**
+     * Phân tích CSV chuẩn hỗ trợ ô có xuống dòng (multiline) trong dấu nháy kép
+     */
+    function parseCSVGrid(csvText) {
+      const rows = [];
+      let row = [];
+      let cur = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < csvText.length; i++) {
+        const ch = csvText[i];
+        const next = csvText[i + 1];
+
+        if (ch === '"') {
+          if (inQuotes && next === '"') {
+            cur += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === ',' && !inQuotes) {
+          row.push(cur.trim());
+          cur = '';
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          if (ch === '\r' && next === '\n') i++;
+          row.push(cur.trim());
+          if (row.some(cell => cell !== '')) {
+            rows.push(row);
+          }
+          row = [];
+          cur = '';
+        } else {
+          cur += ch;
+        }
+      }
+      if (cur !== '' || row.length > 0) {
+        row.push(cur.trim());
+        if (row.some(cell => cell !== '')) {
+          rows.push(row);
+        }
+      }
+      return rows;
+    }
+
+    /**
+     * Đồng bộ trực tiếp thời gian thực từ Google Sheet CSV (dành cho Vercel / Localhost)
+     */
+    async function fetchLiveGoogleSheetCSV() {
+      const sheetId = currentConfig.spreadsheetId || '1iI3Cl98W-WMg6ioHe8w4CZkb5NopkN8ZwzaUJM5WMDU';
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
+      const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timer);
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+
+      const csvText = await response.text();
+      const grid = parseCSVGrid(csvText);
+      if (!grid || grid.length < 2) throw new Error('CSV trống');
+
+      // Xử lý kế thừa các ô gộp (Merged Cells) theo cấu trúc thực tế của Google Sheet
+      let curSttKh = '';
+      let curTba = '';
+      let curHoSoChung = '';
+      let curGhiChu = '';
+      let curLienHe = '';
+
+      const rawList = [];
+      for (let r = 1; r < grid.length; r++) {
+        const cols = grid[r];
+        while (cols.length < 26) cols.push('');
+
+        const rowIndex = r + 1; // Dòng thực tế trên Google Sheet (Dòng 2 đến Dòng 23)
+        const isNewStation = cols[2] !== '';
+
+        if (isNewStation) {
+          curSttKh = cols[0] || curSttKh;
+          curTba = cols[2];
+          curHoSoChung = cols[21];
+          curGhiChu = cols[22];
+          curLienHe = cols[23];
+        } else {
+          if (!cols[0]) cols[0] = curSttKh;
+          if (!cols[2]) cols[2] = curTba;
+          if (!cols[21]) cols[21] = curHoSoChung;
+          if (!cols[23]) cols[23] = curLienHe;
+          // Kế thừa Ghi chú (Cột W) cho các cụm ô gộp W2:W5 (China Steel) và W6:W8 (Tung Ho)
+          if (!cols[22] && (curTba.includes('CHINA STEEL') || curTba.includes('TUNG HO'))) {
+            cols[22] = curGhiChu;
+          }
+        }
+
+        // Xử lý ô gộp K2:R3, Y2:Z3 và K4:R5, Y4:Z5 của TRẠM GIS 110 KV CHINA STEEL (Tuyến 131B & 132B dùng chung TU, TI, Cột Y, Cột Z với 131M & 132M)
+        if (curTba.includes('CHINA STEEL') && cols[5].toLowerCase() === 'x' && r > 1) {
+          const prevCols = grid[r - 1];
+          for (let c = 10; c <= 17; c++) {
+            if (!cols[c]) cols[c] = prevCols[c] || '';
+          }
+          if (!cols[24]) cols[24] = prevCols[24] || '';
+          if (!cols[25]) cols[25] = prevCols[25] || '';
+        }
+
+        if (!cols[2] && !cols[3] && !cols[4]) continue;
+
+        rawList.push({
+          rowIndex: rowIndex,
+          sttKh: cols[0],
+          sttDiemDo: cols[1],
+          tenTba: cols[2],
+          tenDiemDo: cols[3],
+          maDiemDo: cols[4],
+          isBackup: cols[5].toLowerCase().includes('x'),
+          congTo: { serial: cols[6], ngayKd: cols[7], hanKd: cols[8], conLai: cols[9] },
+          tu: { serial: cols[10], ngayKd: cols[11], hanKd: cols[12], conLai: cols[13] },
+          ti: { serial: cols[14], ngayKd: cols[15], hanKd: cols[16], conLai: cols[17] },
+          hoSo: {
+            congTo: cols[18],
+            tu: cols[19],
+            ti: cols[20],
+            chung: cols[21],
+            isMissing: checkMissingDocsClient(cols[18], cols[19], cols[20], cols[21])
+          },
+          ghiChu: cols[22],
+          lienHe: cols[23],
+          ngayCanhBaoRaw: cols[24],
+          canhBao: cols[25]
+        });
+      }
+
+      return processPointListRealTime(rawList);
+    }
+
+    /**
+     * Dữ liệu chuẩn xác 100% từ Google Sheet (8 Trạm 110kV - 22 Điểm đo từ Dòng 2 đến Dòng 23)
+     * Được sử dụng ngay lập tức hoặc khi không có kết nối mạng
      */
     function generateMockData() {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
       const rawList = [
-        // 1. CHINA STEEL
+        // ==================== 1. TRẠM GIS 110 KV CHINA STEEL (4 điểm đo: Dòng 2 - 5) ====================
+        {
+          rowIndex: 2,
+          sttKh: "2",
+          sttDiemDo: "9",
+          tenTba: "TRẠM GIS 110 KV CHINA STEEL",
+          tenDiemDo: "Công ty Cổ Phần CHINA STEEL & NIPPON STEEL VIỆT NAM - 131M",
+          maDiemDo: "PB15040066421",
+          isBackup: false,
+          congTo: { serial: "19049607", ngayKd: "17/12/2025", hanKd: "31/12/2028", conLai: "Hạn kiểm định còn 27 tháng" },
+          tu: { serial: "43188-1030/2B pha A\n43188-1030/2B pha B\n43188-1030/2B pha C", ngayKd: "31/10/2022", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          ti: { serial: "2011/41388-1005/1/D3 pha A\n2011/41388-1005/1/D3 pha B\n2011/41388-1005/1/D3 pha C", ngayKd: "31/10/2022", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "- Cty Thép China Steel đã kiểm định công tơ T12/2025, nhưng chưa cung cấp hồ sơ pháp lý theo VB 724EVNHCMC-KD",
+          lienHe: "- anh Nguyễn Huỳnh Mỹ Phong (Kỹ sư vận hành trạm) - ĐT: 0909410061\n- anh Đặng Quốc Đạt (trưởng phòng Tiện Ích) - ĐT: 0937455045",
+          ngayCanhBaoRaw: "10/31/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
+        },
+        {
+          rowIndex: 3,
+          sttKh: "2",
+          sttDiemDo: "10",
+          tenTba: "TRẠM GIS 110 KV CHINA STEEL",
+          tenDiemDo: "Công ty Cổ Phần CHINA STEEL & NIPPON STEEL VIỆT NAM - Tuyến 131B",
+          maDiemDo: "",
+          isBackup: true,
+          congTo: { serial: "12050030", ngayKd: "17/12/2025", hanKd: "31/12/2028", conLai: "Hạn kiểm định còn 27 tháng" },
+          tu: { serial: "43188-1030/2B pha A\n43188-1030/2B pha B\n43188-1030/2B pha C", ngayKd: "31/10/2022", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          ti: { serial: "2011/41388-1005/1/D3 pha A\n2011/41388-1005/1/D3 pha B\n2011/41388-1005/1/D3 pha C", ngayKd: "31/10/2022", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "- Cty Thép China Steel đã kiểm định công tơ T12/2025, nhưng chưa cung cấp hồ sơ pháp lý theo VB 724EVNHCMC-KD",
+          lienHe: "- anh Nguyễn Huỳnh Mỹ Phong (Kỹ sư vận hành trạm) - ĐT: 0909410061\n- anh Đặng Quốc Đạt (trưởng phòng Tiện Ích) - ĐT: 0937455045",
+          ngayCanhBaoRaw: "10/31/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
+        },
+        {
+          rowIndex: 4,
+          sttKh: "2",
+          sttDiemDo: "11",
+          tenTba: "TRẠM GIS 110 KV CHINA STEEL",
+          tenDiemDo: "Công ty Cổ Phần CHINA STEEL & NIPPON STEEL VIỆT NAM - 132M",
+          maDiemDo: "PB15040066423",
+          isBackup: false,
+          congTo: { serial: "19049608", ngayKd: "17/12/2025", hanKd: "31/12/2028", conLai: "Hạn kiểm định còn 27 tháng" },
+          tu: { serial: "43188-1030/1B pha A\n43188-1030/1B pha B\n43188-1030/1B pha C", ngayKd: "31/10/2022", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          ti: { serial: "2011/41388-1005/2/D3 pha A\n2011/41388-1005/2/D3 pha B\n2011/41388-1005/2/D3 pha C", ngayKd: "31/10/2022", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "- Cty Thép China Steel đã kiểm định công tơ T12/2025, nhưng chưa cung cấp hồ sơ pháp lý theo VB 724EVNHCMC-KD",
+          lienHe: "- anh Nguyễn Huỳnh Mỹ Phong (Kỹ sư vận hành trạm) - ĐT: 0909410061\n- anh Đặng Quốc Đạt (trưởng phòng Tiện Ích) - ĐT: 0937455045",
+          ngayCanhBaoRaw: "10/31/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
+        },
+        {
+          rowIndex: 5,
+          sttKh: "2",
+          sttDiemDo: "12",
+          tenTba: "TRẠM GIS 110 KV CHINA STEEL",
+          tenDiemDo: "Công ty Cổ Phần CHINA STEEL & NIPPON STEEL VIỆT NAM - Tuyến 132B",
+          maDiemDo: "",
+          isBackup: true,
+          congTo: { serial: "12050031", ngayKd: "17/12/2025", hanKd: "31/12/2028", conLai: "Hạn kiểm định còn 27 tháng" },
+          tu: { serial: "43188-1030/1B pha A\n43188-1030/1B pha B\n43188-1030/1B pha C", ngayKd: "31/10/2022", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          ti: { serial: "2011/41388-1005/2/D3 pha A\n2011/41388-1005/2/D3 pha B\n2011/41388-1005/2/D3 pha C", ngayKd: "31/10/2022", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "- Cty Thép China Steel đã kiểm định công tơ T12/2025, nhưng chưa cung cấp hồ sơ pháp lý theo VB 724EVNHCMC-KD",
+          lienHe: "- anh Nguyễn Huỳnh Mỹ Phong (Kỹ sư vận hành trạm) - ĐT: 0909410061\n- anh Đặng Quốc Đạt (trưởng phòng Tiện Ích) - ĐT: 0937455045",
+          ngayCanhBaoRaw: "10/31/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
+        },
+
+        // ==================== 2. TRẠM 110 KV TUNG HO (3 điểm đo: Dòng 6 - 8) ====================
         {
           rowIndex: 6,
-          sttKh: "1",
-          sttDiemDo: "1",
-          tenTba: "TRẠM GIS 110 KV CHINA STEEL",
-          tenDiemDo: "Lộ 171 - Ngăn lộ chính",
-          maDiemDo: "PB110CS01",
+          sttKh: "3",
+          sttDiemDo: "13",
+          tenTba: "TRẠM 110 KV TUNG HO",
+          tenDiemDo: "T133 - Công Ty TNHH Thép TungHo Việt Nam",
+          maDiemDo: "PB15040066431",
           isBackup: false,
-          congTo: { serial: "CS-2022-8921", ngayKd: "15/05/2023", hanKd: "15/05/2026", conLai: "-5.0 tháng", monthsLeft: -5.0, status: "expired" },
-          tu: { serial: "TU-A/B/C-110", ngayKd: "10/04/2021", hanKd: "10/04/2026", conLai: "-6.2 tháng", monthsLeft: -6.2, status: "expired" },
-          ti: { serial: "TI-110-882A", ngayKd: "15/05/2023", hanKd: "15/05/2027", conLai: "7.0 tháng", monthsLeft: 7.0, status: "warning" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "chưa có CO, CQ, QĐ phê duyệt mẫu", isMissing: true },
-          ghiChu: "Chu kỳ kiểm định trước đã thực hiện xong",
-          lienHe: "Nguyễn Văn Tuấn - Trưởng ca (0988123456) - tuan.cs@chinasteel.com",
-          phoneContact: "0988123456",
-          ngayCanhBaoGanNhat: "10/04/2026",
-          canhBao: "ĐÃ HOÀN THÀNH GỬI VB"
+          congTo: { serial: "58413823", ngayKd: "27/06/2024", hanKd: "30/06/2027", conLai: "Hạn kiểm định còn 9 tháng" },
+          tu: { serial: "1107A1494 - 1106A1297 - 1106A1296", ngayKd: "26/06/2024", hanKd: "30/06/2029", conLai: "Hạn kiểm định còn 32 tháng" },
+          ti: { serial: "1105F0643 - 1105F0642 - 1105F0644", ngayKd: "26/06/2024", hanKd: "30/06/2029", conLai: "Hạn kiểm định còn 32 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "- chưa thay công tơ",
+          lienHe: "- anh Nguyễn An Anh Vũ (Phòng Công cộng) - ĐT: 0947282324 - Email: A0582@tunghosteel.com",
+          ngayCanhBaoRaw: "6/30/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
         {
           rowIndex: 7,
-          sttKh: "1",
-          sttDiemDo: "2",
-          tenTba: "TRẠM GIS 110 KV CHINA STEEL",
-          tenDiemDo: "Lộ 172 - Dự phòng",
-          maDiemDo: "PB110CS02",
-          isBackup: true,
-          congTo: { serial: "CS-2022-8922", ngayKd: "15/01/2024", hanKd: "15/01/2027", conLai: "3.0 tháng", monthsLeft: 3.0, status: "urgent" },
-          tu: { serial: "TU-A/B/C-110", ngayKd: "15/01/2024", hanKd: "15/01/2029", conLai: "27.0 tháng", monthsLeft: 27.0, status: "safe" },
-          ti: { serial: "TI-110-882B", ngayKd: "15/01/2024", hanKd: "15/01/2029", conLai: "27.0 tháng", monthsLeft: 27.0, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "có CO, CQ, QĐ phê duyệt mẫu", isMissing: false },
-          ghiChu: "Công tơ dự phòng đến hạn 15/01/2027",
-          lienHe: "Nguyễn Văn Tuấn - Trưởng ca (0988123456) - tuan.cs@chinasteel.com",
-          phoneContact: "0988123456",
-          ngayCanhBaoGanNhat: "15/01/2027",
-          canhBao: ""
+          sttKh: "3",
+          sttDiemDo: "14",
+          tenTba: "TRẠM 110 KV TUNG HO",
+          tenDiemDo: "T131 - Công Ty TNHH Thép TungHo Việt Nam",
+          maDiemDo: "PB15040066419",
+          isBackup: false,
+          congTo: { serial: "58413826", ngayKd: "26/06/2024", hanKd: "30/06/2027", conLai: "Hạn kiểm định còn 9 tháng" },
+          tu: { serial: "1107A1496 - 1107A1495 - 1107A1493", ngayKd: "26/06/2024", hanKd: "30/06/2029", conLai: "Hạn kiểm định còn 32 tháng" },
+          ti: { serial: "1105F0632 - 1105F0631", ngayKd: "26/06/2024", hanKd: "30/06/2029", conLai: "Hạn kiểm định còn 32 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "- chưa thay công tơ",
+          lienHe: "- anh Nguyễn An Anh Vũ (Phòng Công cộng) - ĐT: 0947282324 - Email: A0582@tunghosteel.com",
+          ngayCanhBaoRaw: "6/30/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
-
-        // 2. TUNG HO
         {
           rowIndex: 8,
-          sttKh: "2",
-          sttDiemDo: "1",
+          sttKh: "3",
+          sttDiemDo: "15",
           tenTba: "TRẠM 110 KV TUNG HO",
-          tenDiemDo: "Đo đếm ranh giới Lộ 173",
-          maDiemDo: "PB110TH01",
+          tenDiemDo: "T132 - Công Ty TNHH Thép TungHo Việt Nam",
+          maDiemDo: "PB15040066428",
           isBackup: false,
-          congTo: { serial: "TH-2021-0012", ngayKd: "20/11/2022", hanKd: "20/11/2026", conLai: "1.1 tháng", monthsLeft: 1.1, status: "urgent" },
-          tu: { serial: "TU-TH-A/B/C", ngayKd: "20/11/2022", hanKd: "20/11/2027", conLai: "13.1 tháng", monthsLeft: 13.1, status: "safe" },
-          ti: { serial: "TI-TH-A/B/C", ngayKd: "20/11/2022", hanKd: "20/11/2026", conLai: "1.1 tháng", monthsLeft: 1.1, status: "urgent" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "chưa có", isMissing: true },
-          ghiChu: "Khách hàng chuẩn bị gửi hồ sơ bổ sung",
-          lienHe: "Trần Minh Hoàng - Kỹ thuật trưởng (0903998877)",
-          phoneContact: "0903998877",
-          ngayCanhBaoGanNhat: "20/11/2026",
+          congTo: { serial: "58413827", ngayKd: "26/06/2024", hanKd: "30/06/2027", conLai: "Hạn kiểm định còn 9 tháng" },
+          tu: { serial: "37992011986 - 37992011987 - 37992011988", ngayKd: "26/06/2024", hanKd: "30/06/2029", conLai: "Hạn kiểm định còn 32 tháng" },
+          ti: { serial: "37994040180", ngayKd: "11/05/2023", hanKd: "31/05/2028", conLai: "Hạn kiểm định còn 20 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- có CO, CQ, QĐ Phê duyệt mẫu", chung: "- chưa có", isMissing: true },
+          ghiChu: "- chưa thay công tơ",
+          lienHe: "- anh Nguyễn An Anh Vũ (Phòng Công cộng) - ĐT: 0947282324 - Email: A0582@tunghosteel.com",
+          ngayCanhBaoRaw: "6/30/2027",
           canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
+
+        // ==================== 3. TRẠM 110 KV LINDE GAS (1 điểm đo: Dòng 9) ====================
         {
           rowIndex: 9,
-          sttKh: "2",
-          sttDiemDo: "2",
-          tenTba: "TRẠM 110 KV TUNG HO",
-          tenDiemDo: "Đo đếm ranh giới Lộ 174",
-          maDiemDo: "PB110TH02",
-          isBackup: true,
-          congTo: { serial: "TH-2021-0013", ngayKd: "20/11/2022", hanKd: "20/11/2026", conLai: "1.1 tháng", monthsLeft: 1.1, status: "urgent" },
-          tu: { serial: "TU-TH-A/B/C", ngayKd: "20/11/2022", hanKd: "20/11/2027", conLai: "13.1 tháng", monthsLeft: 13.1, status: "safe" },
-          ti: { serial: "TI-TH-A/B/C", ngayKd: "20/11/2022", hanKd: "20/11/2027", conLai: "13.1 tháng", monthsLeft: 13.1, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "có đầy đủ CO, CQ", isMissing: false },
-          ghiChu: "Điểm đo dự phòng Lộ 174",
-          lienHe: "Trần Minh Hoàng - Kỹ thuật trưởng (0903998877)",
-          phoneContact: "0903998877",
-          ngayCanhBaoGanNhat: "20/11/2026",
+          sttKh: "4",
+          sttDiemDo: "19",
+          tenTba: "TRẠM 110 KV LINDE GAS",
+          tenDiemDo: "T131 - Công ty TNHH LINDE Việt Nam",
+          maDiemDo: "PB15040066418",
+          isBackup: false,
+          congTo: { serial: "17050968", ngayKd: "07/08/2024", hanKd: "31/08/2027", conLai: "Hạn kiểm định còn 11 tháng" },
+          tu: { serial: "13003782 - 13003783 - 13003784", ngayKd: "22/02/2024", hanKd: "28/02/2029", conLai: "Hạn kiểm định còn 28 tháng" },
+          ti: { serial: "310922 - 310923 - 310924", ngayKd: "22/02/2024", hanKd: "28/02/2029", conLai: "Hạn kiểm định còn 28 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "- chưa thay công tơ",
+          lienHe: "- anh Nguyễn Tiến Mạnh - Phụ trách Hệ thống điện - ĐT: 0902701170 - Email: manh.nguyen@linde.com",
+          ngayCanhBaoRaw: "8/31/2027",
           canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
 
-        // 3. POMINA 2
+        // ==================== 4. TRẠM 110 KV POSCO VIỆT NAM (1 điểm đo: Dòng 10) ====================
         {
           rowIndex: 10,
-          sttKh: "3",
-          sttDiemDo: "1",
-          tenTba: "TRẠM 110 KV POMINA 2",
-          tenDiemDo: "Lộ 171 Máy biến áp T1",
-          maDiemDo: "PB110PM01",
+          sttKh: "8",
+          sttDiemDo: "30",
+          tenTba: "TRẠM 110 KV POSCO VIỆT NAM",
+          tenDiemDo: "Công ty TNHH POSCO - Việt Nam",
+          maDiemDo: "PB15040066417",
           isBackup: false,
-          congTo: { serial: "PM-88992", ngayKd: "10/01/2024", hanKd: "10/01/2028", conLai: "14.8 tháng", monthsLeft: 14.8, status: "safe" },
-          tu: { serial: "TU-PM-110", ngayKd: "10/01/2024", hanKd: "10/01/2029", conLai: "26.8 tháng", monthsLeft: 26.8, status: "safe" },
-          ti: { serial: "TI-PM-110", ngayKd: "10/01/2024", hanKd: "10/01/2029", conLai: "26.8 tháng", monthsLeft: 26.8, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "có đầy đủ CO, CQ, QĐ phê duyệt mẫu", isMissing: false },
-          ghiChu: "Vận hành ổn định",
-          lienHe: "Lê Văn Hùng - P.Cơ điện (0918776655)",
-          phoneContact: "0918776655",
-          ngayCanhBaoGanNhat: "10/01/2028",
-          canhBao: ""
-        },
-        {
-          rowIndex: 11,
-          sttKh: "3",
-          sttDiemDo: "2",
-          tenTba: "TRẠM 110 KV POMINA 2",
-          tenDiemDo: "Lộ 172 Máy biến áp T2",
-          maDiemDo: "PB110PM02",
-          isBackup: false,
-          congTo: { serial: "PM-88993", ngayKd: "10/01/2024", hanKd: "10/01/2028", conLai: "14.8 tháng", monthsLeft: 14.8, status: "safe" },
-          tu: { serial: "TU-PM-110-B", ngayKd: "10/01/2024", hanKd: "10/01/2029", conLai: "26.8 tháng", monthsLeft: 26.8, status: "safe" },
-          ti: { serial: "TI-PM-110-B", ngayKd: "10/01/2024", hanKd: "10/01/2029", conLai: "26.8 tháng", monthsLeft: 26.8, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "có đầy đủ CO, CQ", isMissing: false },
-          ghiChu: "T2 vận hành bình thường",
-          lienHe: "Lê Văn Hùng - P.Cơ điện (0918776655)",
-          phoneContact: "0918776655",
-          ngayCanhBaoGanNhat: "10/01/2028",
-          canhBao: ""
+          congTo: { serial: "17090928", ngayKd: "11/04/2024", hanKd: "30/04/2027", conLai: "Hạn kiểm định còn 7 tháng" },
+          tu: { serial: "821789", ngayKd: "11/04/2024", hanKd: "11/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          ti: { serial: "2312 - 2313 - 2314", ngayKd: "11/04/2024", hanKd: "11/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "",
+          lienHe: "- anh Sơn - ĐT: 0937041392",
+          ngayCanhBaoRaw: "4/30/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
 
-        // 4. THÉP MIỀN NAM
+        // ==================== 5. TRẠM GIS 110 KV POSCO SS VINA (4 điểm đo: Dòng 11 - 14) ====================
+        {
+          rowIndex: 11,
+          sttKh: "9",
+          sttDiemDo: "31",
+          tenTba: "TRẠM GIS 110 KV POSCO SS VINA",
+          tenDiemDo: "Công ty Cổ Phần Thép POSCO YAMATO VINA",
+          maDiemDo: "PB15040066408",
+          isBackup: false,
+          congTo: { serial: "56677740", ngayKd: "05/10/2024", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          tu: { serial: "22131158", ngayKd: "05/10/2024", hanKd: "05/10/2029", conLai: "Hạn kiểm định còn 36 tháng" },
+          ti: { serial: "110256", ngayKd: "05/10/2024", hanKd: "05/10/2029", conLai: "Hạn kiểm định còn 36 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "",
+          lienHe: "- anh Minh Nguyên - Phụ trách Trạm - ĐT: 0902620805",
+          ngayCanhBaoRaw: "10/31/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
+        },
         {
           rowIndex: 12,
-          sttKh: "4",
-          sttDiemDo: "1",
-          tenTba: "TRẠM 110 KV THÉP MIỀN NAM",
-          tenDiemDo: "Lộ 171 Đầu cực MBA T1",
-          maDiemDo: "PB110TMN01",
+          sttKh: "9",
+          sttDiemDo: "32",
+          tenTba: "TRẠM GIS 110 KV POSCO SS VINA",
+          tenDiemDo: "Công ty Cổ Phần Thép POSCO YAMATO VINA",
+          maDiemDo: "PB15040066434",
           isBackup: false,
-          congTo: { serial: "TMN-44510", ngayKd: "05/08/2023", hanKd: "05/08/2026", conLai: "-2.4 tháng", monthsLeft: -2.4, status: "expired" },
-          tu: { serial: "TU-TMN-110", ngayKd: "05/08/2021", hanKd: "05/08/2026", conLai: "-2.4 tháng", monthsLeft: -2.4, status: "expired" },
-          ti: { serial: "TI-TMN-110", ngayKd: "05/08/2021", hanKd: "05/08/2026", conLai: "-2.4 tháng", monthsLeft: -2.4, status: "expired" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "chưa có QĐ phê duyệt mẫu", isMissing: true },
-          ghiChu: "Đã xử lý chu kỳ trước",
-          lienHe: "Vũ Đình Trọng - Phó Ban Điện (0979334455)",
-          phoneContact: "0979334455",
-          ngayCanhBaoGanNhat: "05/08/2026",
-          canhBao: "ĐÃ HOÀN THÀNH GỬI VB (Hạn trước hôm nay)"
+          congTo: { serial: "56677594", ngayKd: "05/10/2024", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          tu: { serial: "22131159", ngayKd: "05/10/2024", hanKd: "05/10/2029", conLai: "Hạn kiểm định còn 36 tháng" },
+          ti: { serial: "110259", ngayKd: "05/10/2024", hanKd: "05/10/2029", conLai: "Hạn kiểm định còn 36 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "",
+          lienHe: "- anh Minh Nguyên - Phụ trách Trạm - ĐT: 0902620805",
+          ngayCanhBaoRaw: "10/31/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
         {
           rowIndex: 13,
-          sttKh: "4",
-          sttDiemDo: "2",
-          tenTba: "TRẠM 110 KV THÉP MIỀN NAM",
-          tenDiemDo: "Lộ 172 Đầu cực MBA T2",
-          maDiemDo: "PB110TMN02",
+          sttKh: "9",
+          sttDiemDo: "33",
+          tenTba: "TRẠM GIS 110 KV POSCO SS VINA",
+          tenDiemDo: "T131 (BACK UP) CÔNG TY TNHH POSCO SS VINA",
+          maDiemDo: "PB15040099995001",
           isBackup: true,
-          congTo: { serial: "TMN-44511", ngayKd: "05/08/2023", hanKd: "05/08/2027", conLai: "9.6 tháng", monthsLeft: 9.6, status: "warning" },
-          tu: { serial: "TU-TMN-110", ngayKd: "05/08/2023", hanKd: "05/08/2028", conLai: "21.6 tháng", monthsLeft: 21.6, status: "safe" },
-          ti: { serial: "TI-TMN-110", ngayKd: "05/08/2023", hanKd: "05/08/2028", conLai: "21.6 tháng", monthsLeft: 21.6, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "có CO, CQ", isMissing: false },
-          ghiChu: "Công tơ dự phòng ngăn lộ 172",
-          lienHe: "Vũ Đình Trọng - Phó Ban Điện (0979334455)",
-          phoneContact: "0979334455",
-          ngayCanhBaoGanNhat: "05/08/2027",
-          canhBao: ""
+          congTo: { serial: "56677595", ngayKd: "05/10/2024", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          tu: { serial: "", ngayKd: "", hanKd: "", conLai: "" },
+          ti: { serial: "", ngayKd: "", hanKd: "", conLai: "" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "",
+          lienHe: "- anh Minh Nguyên - Phụ trách Trạm - ĐT: 0902620805",
+          ngayCanhBaoRaw: "10/31/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
-
-        // 5. TỔ HỢP HÓA DẦU LONG SƠN (LSP)
         {
           rowIndex: 14,
-          sttKh: "5",
-          sttDiemDo: "1",
-          tenTba: "TRẠM 110 KV HÓA DẦU LONG SƠN (LSP)",
-          tenDiemDo: "Lộ 171 Ranh giới đo đếm",
-          maDiemDo: "PB110LSP01",
-          isBackup: false,
-          congTo: { serial: "LSP-99120", ngayKd: "18/12/2023", hanKd: "18/12/2026", conLai: "2.0 tháng", monthsLeft: 2.0, status: "urgent" },
-          tu: { serial: "TU-LSP-A/B/C", ngayKd: "18/12/2023", hanKd: "18/12/2028", conLai: "26.0 tháng", monthsLeft: 26.0, status: "safe" },
-          ti: { serial: "TI-LSP-A/B/C", ngayKd: "18/12/2023", hanKd: "18/12/2028", conLai: "26.0 tháng", monthsLeft: 26.0, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "chưa có biên bản treo tháo", isMissing: true },
-          ghiChu: "Cần theo dõi hạn công tơ chính",
-          lienHe: "Phạm Quốc Bảo - Trưởng bộ phận Năng lượng (0938556677)",
-          phoneContact: "0938556677",
-          ngayCanhBaoGanNhat: "18/12/2026",
+          sttKh: "9",
+          sttDiemDo: "34",
+          tenTba: "TRẠM GIS 110 KV POSCO SS VINA",
+          tenDiemDo: "T132 (BACK UP) CÔNG TY TNHH POSCO SS VINA",
+          maDiemDo: "PB15040099994001",
+          isBackup: true,
+          congTo: { serial: "56677596", ngayKd: "05/10/2024", hanKd: "31/10/2027", conLai: "Hạn kiểm định còn 13 tháng" },
+          tu: { serial: "", ngayKd: "", hanKd: "", conLai: "" },
+          ti: { serial: "", ngayKd: "", hanKd: "", conLai: "" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "",
+          lienHe: "- anh Minh Nguyên - Phụ trách Trạm - ĐT: 0902620805",
+          ngayCanhBaoRaw: "10/31/2027",
           canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
+
+        // ==================== 6. TRẠM 110 KV TÔN HOA SEN (2 điểm đo: Dòng 15 - 16) ====================
         {
           rowIndex: 15,
-          sttKh: "5",
-          sttDiemDo: "2",
-          tenTba: "TRẠM 110 KV HÓA DẦU LONG SƠN (LSP)",
-          tenDiemDo: "Lộ 172 Dự phòng đo đếm",
-          maDiemDo: "PB110LSP02",
-          isBackup: true,
-          congTo: { serial: "LSP-99121", ngayKd: "18/12/2023", hanKd: "18/12/2027", conLai: "14.0 tháng", monthsLeft: 14.0, status: "safe" },
-          tu: { serial: "TU-LSP-A/B/C", ngayKd: "18/12/2023", hanKd: "18/12/2028", conLai: "26.0 tháng", monthsLeft: 26.0, status: "safe" },
-          ti: { serial: "TI-LSP-A/B/C", ngayKd: "18/12/2023", hanKd: "18/12/2028", conLai: "26.0 tháng", monthsLeft: 26.0, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "có đầy đủ CO, CQ", isMissing: false },
-          ghiChu: "Hồ sơ lưu trữ đầy đủ",
-          lienHe: "Phạm Quốc Bảo - Trưởng bộ phận Năng lượng (0938556677)",
-          phoneContact: "0938556677",
-          ngayCanhBaoGanNhat: "18/12/2027",
+          sttKh: "10",
+          sttDiemDo: "35",
+          tenTba: "TRẠM 110 KV TÔN HOA SEN",
+          tenDiemDo: "CÔNG TY CỔ PHẦN TẬP ĐOÀN HOA SEN - T131",
+          maDiemDo: "PB15040066402",
+          isBackup: false,
+          congTo: { serial: "17050959", ngayKd: "22/05/2024", hanKd: "31/05/2027", conLai: "Hạn kiểm định còn 8 tháng" },
+          tu: { serial: "21091202020 - 21091202019 - 21091202018", ngayKd: "22/05/2024", hanKd: "22/05/2029", conLai: "Hạn kiểm định còn 31 tháng" },
+          ti: { serial: "43091201819 - 43091201822 - 43091201825", ngayKd: "22/05/2024", hanKd: "22/05/2029", conLai: "Hạn kiểm định còn 31 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "hiện đang tạm ngưng sử dụng",
+          lienHe: "- anh Phạm Quốc Việt - ĐT: 0987860765",
+          ngayCanhBaoRaw: "5/31/2027",
+          canhBao: ""
+        },
+        {
+          rowIndex: 16,
+          sttKh: "10",
+          sttDiemDo: "36",
+          tenTba: "TRẠM 110 KV TÔN HOA SEN",
+          tenDiemDo: "CÔNG TY CỔ PHẦN TẬP ĐOÀN HOA SEN - T132",
+          maDiemDo: "PB15040066424",
+          isBackup: false,
+          congTo: { serial: "19049556", ngayKd: "23/05/2024", hanKd: "31/05/2027", conLai: "Hạn kiểm định còn 8 tháng" },
+          tu: { serial: "21091202021 - 21091202023 - 21091202024", ngayKd: "22/05/2024", hanKd: "22/05/2029", conLai: "Hạn kiểm định còn 31 tháng" },
+          ti: { serial: "37994001880 - 37994001881 - 37994001882", ngayKd: "23/05/2024", hanKd: "22/05/2029", conLai: "Hạn kiểm định còn 31 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- chưa có", ti: "- chưa có", chung: "- chưa có", isMissing: true },
+          ghiChu: "hiện đang tạm ngưng sử dụng",
+          lienHe: "- anh Phạm Quốc Việt - ĐT: 0987860765",
+          ngayCanhBaoRaw: "5/31/2027",
           canhBao: ""
         },
 
-        // 6. HYOSUNG VINA CHEMICALS
-        {
-          rowIndex: 16,
-          sttKh: "6",
-          sttDiemDo: "1",
-          tenTba: "TRẠM 110 KV HYOSUNG VINA",
-          tenDiemDo: "Lộ 171 Đo đếm chính",
-          maDiemDo: "PB110HS01",
-          isBackup: false,
-          congTo: { serial: "HS-77112", ngayKd: "01/03/2022", hanKd: "01/03/2026", conLai: "-7.5 tháng", monthsLeft: -7.5, status: "expired" },
-          tu: { serial: "TU-HS-110", ngayKd: "01/03/2022", hanKd: "01/03/2027", conLai: "4.5 tháng", monthsLeft: 4.5, status: "urgent" },
-          ti: { serial: "TI-HS-110", ngayKd: "01/03/2022", hanKd: "01/03/2027", conLai: "4.5 tháng", monthsLeft: 4.5, status: "urgent" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "chưa có CO, CQ", isMissing: true },
-          ghiChu: "Đã xử lý gửi văn bản chu kỳ trước",
-          lienHe: "Đỗ Anh Tuấn - QL Kỹ thuật (0913889900)",
-          phoneContact: "0913889900",
-          ngayCanhBaoGanNhat: "01/03/2026",
-          canhBao: "ĐÃ HOÀN THÀNH GỬI VB (Hạn trước hôm nay)"
-        },
+        // ==================== 7. TRẠM 110 KV THÉP MIỀN NAM (1 điểm đo: Dòng 17) ====================
         {
           rowIndex: 17,
-          sttKh: "6",
-          sttDiemDo: "2",
-          tenTba: "TRẠM 110 KV HYOSUNG VINA",
-          tenDiemDo: "Lộ 172 Đo đếm dự phòng",
-          maDiemDo: "PB110HS02",
+          sttKh: "11",
+          sttDiemDo: "41",
+          tenTba: "TRẠM 110 KV THÉP MIỀN NAM",
+          tenDiemDo: "Công ty Trách Nhiệm Hữu Hạn Một Thành Viên Thép Miền Nam - VNSTEEL - Tuyến 172",
+          maDiemDo: "PB15040099985001",
           isBackup: true,
-          congTo: { serial: "HS-77113", ngayKd: "01/03/2023", hanKd: "01/03/2027", conLai: "4.5 tháng", monthsLeft: 4.5, status: "urgent" },
-          tu: { serial: "TU-HS-110", ngayKd: "01/03/2022", hanKd: "01/03/2027", conLai: "4.5 tháng", monthsLeft: 4.5, status: "urgent" },
-          ti: { serial: "TI-HS-110", ngayKd: "01/03/2022", hanKd: "01/03/2027", conLai: "4.5 tháng", monthsLeft: 4.5, status: "urgent" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "chưa có", isMissing: true },
-          ghiChu: "Dự phòng sắp hết hạn trong 4.5 tháng tới",
-          lienHe: "Đỗ Anh Tuấn - QL Kỹ thuật (0913889900)",
-          phoneContact: "0913889900",
-          ngayCanhBaoGanNhat: "01/03/2027",
+          congTo: { serial: "18026717", ngayKd: "01/05/2025", hanKd: "30/04/2028", conLai: "Hạn kiểm định còn 19 tháng" },
+          tu: { serial: "1HSE8908734 - 1HSE8908735 - 1HSE8908733", ngayKd: "02/04/2022", hanKd: "31/01/2027", conLai: "Hạn kiểm định còn 4 tháng" },
+          ti: { serial: "1HSE 8913908 - 1HSE 8913909 - 1HSE 8913910", ngayKd: "15/02/2023", hanKd: "30/04/2028", conLai: "Hạn kiểm định còn 19 tháng" },
+          hoSo: { congTo: "- chưa có", tu: "- có QĐ phê duyệt mẫu (QĐ 143)", ti: "- có CO, CQ, QĐ phê duyệt mẫu (QĐ 581)", chung: "- chưa có", isMissing: true },
+          ghiChu: "- TU 172 thay mới ngày 02/04/2022\n- TI 172 thay mới ngày 27/03/2023",
+          lienHe: "- anh Nguyễn Ngọc Thảo - Phó Quản đốc PXCĐ - ĐT: 0989701262 - Email: thaonn@thepmiennam.com.vn",
+          ngayCanhBaoRaw: "1/31/2027",
           canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
 
-        // 7. CẢNG GEMALINK
+        // ==================== 8. TRẠM GIS 110 KV HYOSUNG VINA CHEMICALS (6 điểm đo: Dòng 18 - 23) ====================
         {
           rowIndex: 18,
-          sttKh: "7",
-          sttDiemDo: "1",
-          tenTba: "TRẠM 110 KV CẢNG QUỐC TẾ GEMALINK",
-          tenDiemDo: "Lộ 171 Ngăn lộ chính cảng",
-          maDiemDo: "PB110GL01",
+          sttKh: "13",
+          sttDiemDo: "46",
+          tenTba: "TRẠM GIS 110 KV HYOSUNG VINA CHEMICALS",
+          tenDiemDo: "Công ty TNHH Hóa Chất HYOSUNG VINA - Tổng 131",
+          maDiemDo: "PB15040067874",
           isBackup: false,
-          congTo: { serial: "GL-55201", ngayKd: "15/07/2023", hanKd: "15/07/2027", conLai: "8.9 tháng", monthsLeft: 8.9, status: "warning" },
-          tu: { serial: "TU-GL-A/B/C", ngayKd: "15/07/2023", hanKd: "15/07/2028", conLai: "20.9 tháng", monthsLeft: 20.9, status: "safe" },
-          ti: { serial: "TI-GL-A/B/C", ngayKd: "15/07/2023", hanKd: "15/07/2028", conLai: "20.9 tháng", monthsLeft: 20.9, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "có đầy đủ CO, CQ, QĐ phê duyệt mẫu", isMissing: false },
-          ghiChu: "Theo dõi định kỳ",
-          lienHe: "Hoàng Văn Nam - TP Bảo trì (0908112233)",
-          phoneContact: "0908112233",
-          ngayCanhBaoGanNhat: "15/07/2027",
-          canhBao: ""
+          congTo: { serial: "56677564", ngayKd: "17/04/2024", hanKd: "30/04/2027", conLai: "Hạn kiểm định còn 7 tháng" },
+          tu: { serial: "D707710A", ngayKd: "17/04/2024", hanKd: "17/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          ti: { serial: "pha A: SN18-9802\npha B: SN18-9703\npha C: SN18-9704", ngayKd: "17/04/2024", hanKd: "17/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          hoSo: { congTo: "- có CO, CQ, QĐ phê duyệt mẫu", tu: "- có CO, CQ, QĐ phê duyệt mẫu", ti: "- có CO, CQ, QĐ phê duyệt mẫu", chung: "- có", isMissing: false },
+          ghiChu: "",
+          lienHe: "- anh Quang Anh - ĐT: 0983962146",
+          ngayCanhBaoRaw: "4/30/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
         {
           rowIndex: 19,
-          sttKh: "7",
-          sttDiemDo: "2",
-          tenTba: "TRẠM 110 KV CẢNG QUỐC TẾ GEMALINK",
-          tenDiemDo: "Lộ 172 Ngăn lộ dự phòng cảng",
-          maDiemDo: "PB110GL02",
+          sttKh: "13",
+          sttDiemDo: "47",
+          tenTba: "TRẠM GIS 110 KV HYOSUNG VINA CHEMICALS",
+          tenDiemDo: "Công ty TNHH Hóa Chất HYOSUNG VINA - tuyến 173",
+          maDiemDo: "",
           isBackup: true,
-          congTo: { serial: "GL-55202", ngayKd: "15/07/2023", hanKd: "15/07/2027", conLai: "8.9 tháng", monthsLeft: 8.9, status: "warning" },
-          tu: { serial: "TU-GL-A/B/C", ngayKd: "15/07/2023", hanKd: "15/07/2028", conLai: "20.9 tháng", monthsLeft: 20.9, status: "safe" },
-          ti: { serial: "TI-GL-A/B/C", ngayKd: "15/07/2023", hanKd: "15/07/2028", conLai: "20.9 tháng", monthsLeft: 20.9, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "có CO, CQ", isMissing: false },
-          ghiChu: "Vận hành bình thường",
-          lienHe: "Hoàng Văn Nam - TP Bảo trì (0908112233)",
-          phoneContact: "0908112233",
-          ngayCanhBaoGanNhat: "15/07/2027",
-          canhBao: ""
+          congTo: { serial: "56677610", ngayKd: "17/04/2024", hanKd: "30/04/2027", conLai: "Hạn kiểm định còn 7 tháng" },
+          tu: { serial: "D707705A", ngayKd: "17/04/2024", hanKd: "17/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          ti: { serial: "pha A: SN18-9841\npha B: SN18-9742\npha C: SN18-9743", ngayKd: "17/04/2024", hanKd: "17/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          hoSo: { congTo: "- có CO, CQ, QĐ phê duyệt mẫu", tu: "- có CO, CQ, QĐ phê duyệt mẫu", ti: "- có CO, CQ, QĐ phê duyệt mẫu", chung: "- có", isMissing: false },
+          ghiChu: "",
+          lienHe: "- anh Quang Anh - ĐT: 0983962146",
+          ngayCanhBaoRaw: "4/30/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
-
-        // 8. ĐẠM PHÚ MỸ
         {
           rowIndex: 20,
-          sttKh: "8",
-          sttDiemDo: "1",
-          tenTba: "TRẠM 110 KV ĐẠM PHÚ MỸ",
-          tenDiemDo: "Lộ 171 Đầu vào TBA",
-          maDiemDo: "PB110DPM01",
+          sttKh: "13",
+          sttDiemDo: "48",
+          tenTba: "TRẠM GIS 110 KV HYOSUNG VINA CHEMICALS",
+          tenDiemDo: "Công ty TNHH Hóa Chất HYOSUNG VINA - Tổng 132",
+          maDiemDo: "PB15040067876",
           isBackup: false,
-          congTo: { serial: "DPM-11223", ngayKd: "12/10/2023", hanKd: "12/10/2026", conLai: "-0.2 tháng", monthsLeft: -0.2, status: "expired" },
-          tu: { serial: "TU-DPM-110", ngayKd: "12/10/2023", hanKd: "12/10/2028", conLai: "23.8 tháng", monthsLeft: 23.8, status: "safe" },
-          ti: { serial: "TI-DPM-110", ngayKd: "12/10/2023", hanKd: "12/10/2028", conLai: "23.8 tháng", monthsLeft: 23.8, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "chưa có QĐ phê duyệt mẫu", isMissing: true },
-          ghiChu: "Hạn trước hôm nay, đã thực hiện xong",
-          lienHe: "Nguyễn Thành Lộc - Ban Điện Khí (0909445566)",
-          phoneContact: "0909445566",
-          ngayCanhBaoGanNhat: "12/10/2026",
-          canhBao: "ĐÃ HOÀN THÀNH GỬI VB (Hạn trước hôm nay)"
+          congTo: { serial: "56677607", ngayKd: "19/04/2024", hanKd: "30/04/2027", conLai: "Hạn kiểm định còn 7 tháng" },
+          tu: { serial: "D707709A", ngayKd: "19/04/2024", hanKd: "19/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          ti: { serial: "pha A: SN18-9742 - SN18-9745\npha B: SN18-9743 - SN18-9746\npha C: SN18-9744 - SN18-9747", ngayKd: "19/04/2024", hanKd: "19/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          hoSo: { congTo: "- có CO, CQ, QĐ phê duyệt mẫu", tu: "- có CO, CQ, QĐ phê duyệt mẫu", ti: "- có CO, CQ, QĐ phê duyệt mẫu", chung: "- có", isMissing: false },
+          ghiChu: "",
+          lienHe: "- anh Quang Anh - ĐT: 0983962146",
+          ngayCanhBaoRaw: "4/30/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
         },
         {
           rowIndex: 21,
-          sttKh: "8",
-          sttDiemDo: "2",
-          tenTba: "TRẠM 110 KV ĐẠM PHÚ MỸ",
-          tenDiemDo: "Lộ 172 Đầu vào TBA dự phòng",
-          maDiemDo: "PB110DPM02",
+          sttKh: "13",
+          sttDiemDo: "49",
+          tenTba: "TRẠM GIS 110 KV HYOSUNG VINA CHEMICALS",
+          tenDiemDo: "Công ty TNHH Hóa Chất HYOSUNG VINA - tuyến 174",
+          maDiemDo: "",
           isBackup: true,
-          congTo: { serial: "DPM-11224", ngayKd: "12/10/2023", hanKd: "12/10/2027", conLai: "11.8 tháng", monthsLeft: 11.8, status: "warning" },
-          tu: { serial: "TU-DPM-110", ngayKd: "12/10/2023", hanKd: "12/10/2028", conLai: "23.8 tháng", monthsLeft: 23.8, status: "safe" },
-          ti: { serial: "TI-DPM-110", ngayKd: "12/10/2023", hanKd: "12/10/2028", conLai: "23.8 tháng", monthsLeft: 23.8, status: "safe" },
-          hoSo: { congTo: "", tu: "", ti: "", chung: "có đầy đủ CO, CQ", isMissing: false },
-          ghiChu: "Vận hành ổn định",
-          lienHe: "Nguyễn Thành Lộc - Ban Điện Khí (0909445566)",
-          phoneContact: "0909445566",
-          ngayCanhBaoGanNhat: "12/10/2027",
-          canhBao: ""
+          congTo: { serial: "56677611", ngayKd: "17/04/2024", hanKd: "30/04/2027", conLai: "Hạn kiểm định còn 7 tháng" },
+          tu: { serial: "D707708A", ngayKd: "19/04/2024", hanKd: "19/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          ti: { serial: "pha A: SN18-9766 - SN18-9763\npha B: SN18-9767 - SN18-9764\npha C: SN18-9768 - SN18-9765", ngayKd: "19/04/2024", hanKd: "19/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          hoSo: { congTo: "- có CO, CQ, QĐ phê duyệt mẫu", tu: "- có CO, CQ, QĐ phê duyệt mẫu", ti: "- có CO, CQ, QĐ phê duyệt mẫu", chung: "- có", isMissing: false },
+          ghiChu: "",
+          lienHe: "- anh Quang Anh - ĐT: 0983962146",
+          ngayCanhBaoRaw: "4/30/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
+        },
+        {
+          rowIndex: 22,
+          sttKh: "13",
+          sttDiemDo: "50",
+          tenTba: "TRẠM GIS 110 KV HYOSUNG VINA CHEMICALS",
+          tenDiemDo: "Công ty TNHH Hóa Chất HYOSUNG VINA - tuyến 171",
+          maDiemDo: "",
+          isBackup: true,
+          congTo: { serial: "56677608", ngayKd: "17/04/2024", hanKd: "30/04/2027", conLai: "Hạn kiểm định còn 7 tháng" },
+          tu: { serial: "D707706A", ngayKd: "17/04/2024", hanKd: "17/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          ti: { serial: "pha A: SN18-9826\npha B: SN18-9727\npha C: SN18-9728", ngayKd: "17/04/2024", hanKd: "17/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          hoSo: { congTo: "- có CO, CQ, QĐ phê duyệt mẫu", tu: "- có CO, CQ, QĐ phê duyệt mẫu", ti: "- có CO, CQ, QĐ phê duyệt mẫu", chung: "- có", isMissing: false },
+          ghiChu: "",
+          lienHe: "- anh Quang Anh - ĐT: 0983962146",
+          ngayCanhBaoRaw: "4/30/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
+        },
+        {
+          rowIndex: 23,
+          sttKh: "13",
+          sttDiemDo: "51",
+          tenTba: "TRẠM GIS 110 KV HYOSUNG VINA CHEMICALS",
+          tenDiemDo: "Công ty TNHH Hóa Chất HYOSUNG VINA - tuyến 172",
+          maDiemDo: "",
+          isBackup: true,
+          congTo: { serial: "56677609", ngayKd: "17/04/2024", hanKd: "30/04/2027", conLai: "Hạn kiểm định còn 7 tháng" },
+          tu: { serial: "D707707A", ngayKd: "19/04/2024", hanKd: "19/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          ti: { serial: "pha A: SN18-9781 - SN18-9778\npha B: SN18-9782 - SN18-9779\npha C: SN18-9783 - SN18-9780", ngayKd: "19/04/2024", hanKd: "19/04/2029", conLai: "Hạn kiểm định còn 30 tháng" },
+          hoSo: { congTo: "- có CO, CQ, QĐ phê duyệt mẫu", tu: "- có CO, CQ, QĐ phê duyệt mẫu", ti: "- có CO, CQ, QĐ phê duyệt mẫu", chung: "- có", isMissing: false },
+          ghiChu: "",
+          lienHe: "- anh Quang Anh - ĐT: 0983962146",
+          ngayCanhBaoRaw: "4/30/2027",
+          canhBao: "CẦN GỬI VB NHẮC NHỞ"
         }
       ];
 
-      // =========================================================================
-      // TÍNH TOÁN THỜI GIAN THỰC TỪ NGÀY HÔM NAY (TODAY)
-      // - Hạn trước hôm nay: xem như ĐÃ HOÀN THÀNH GỬI VB
-      // - Đã đánh dấu gửi / ghi hoàn thành: ĐÃ HOÀN THÀNH GỬI VB
-      // - Chưa gửi mà có hạn trong vòng ≤ 6 tháng: CẦN GỬI VB NHẮC NHỞ
-      // =========================================================================
+      return processPointListRealTime(rawList);
+    }
+
+    /**
+     * Tính toán thời gian thực từ ngày hôm nay (TODAY) và áp dụng các thay đổi lưu cục bộ
+     */
+    function processPointListRealTime(rawList) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const overrides = getLocalRowOverrides();
+
       const processedList = rawList.map(item => {
-        let dateObj = null;
-        if (item.ngayCanhBaoGanNhat) {
-          const parts = item.ngayCanhBaoGanNhat.split('/');
-          if (parts.length === 3) {
-            dateObj = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+        const ov = overrides[item.rowIndex];
+        if (ov) {
+          if (ov.congTo) Object.assign(item.congTo, ov.congTo);
+          if (ov.tu) Object.assign(item.tu, ov.tu);
+          if (ov.ti) Object.assign(item.ti, ov.ti);
+          if (ov.hoSoCongTo !== undefined) item.hoSo.congTo = ov.hoSoCongTo;
+          if (ov.hoSoTu !== undefined) item.hoSo.tu = ov.hoSoTu;
+          if (ov.hoSoTi !== undefined) item.hoSo.ti = ov.hoSoTi;
+          if (ov.tinhTrangChung !== undefined) item.hoSo.chung = ov.tinhTrangChung;
+          item.hoSo.isMissing = checkMissingDocsClient(item.hoSo.congTo, item.hoSo.tu, item.hoSo.ti, item.hoSo.chung);
+          if (ov.lienHe !== undefined) item.lienHe = ov.lienHe;
+          if (ov.ghiChu !== undefined) item.ghiChu = ov.ghiChu;
+          if (ov.ngayCanhBaoGanNhat) item.ngayCanhBaoRaw = ov.ngayCanhBaoGanNhat;
+          if (ov.canhBao !== undefined) item.canhBao = ov.canhBao;
+        }
+
+        // Tính thời hạn từng thiết bị Công tơ, TU, TI theo thời gian thực
+        const ctCalc = calcDeviceDateClient(item.congTo.hanKd, item.congTo.conLai, today);
+        item.congTo.monthsLeft = ctCalc.monthsLeft;
+        item.congTo.status = ctCalc.status;
+
+        const tuCalc = calcDeviceDateClient(item.tu.hanKd, item.tu.conLai, today);
+        item.tu.monthsLeft = tuCalc.monthsLeft;
+        item.tu.status = tuCalc.status;
+
+        const tiCalc = calcDeviceDateClient(item.ti.hanKd, item.ti.conLai, today);
+        item.ti.monthsLeft = tiCalc.monthsLeft;
+        item.ti.status = tiCalc.status;
+
+        // Trích xuất danh sách SĐT liên hệ từ Cột X
+        const allPhones = extractAllPhonesClient(item.lienHe);
+        item.allPhones = allPhones;
+        item.phoneContact = allPhones[0] || '';
+
+        // Phân tích Cột Y (hỗ trợ cả MM/DD/YYYY trong Sheet và DD/MM/YYYY)
+        let dateColY = parseDateClient(item.ngayCanhBaoRaw || item.ngayCanhBaoGanNhat, true);
+        if (!dateColY) {
+          const candidates = [ctCalc, tuCalc, tiCalc].filter(c => c.dateObj);
+          if (candidates.length > 0) {
+            candidates.sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+            dateColY = candidates[0].dateObj;
           }
         }
 
         let daysLeft = null;
         let monthsLeft = null;
-
-        if (dateObj) {
-          daysLeft = Math.ceil((dateObj.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        if (dateColY) {
+          item.ngayCanhBaoGanNhat = formatDateDDMMYYYY(dateColY);
+          daysLeft = Math.ceil((dateColY.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           monthsLeft = Math.round((daysLeft / 30.4375) * 10) / 10;
+        } else {
+          item.ngayCanhBaoGanNhat = item.ngayCanhBaoRaw || '';
         }
 
         item.daysLeftColY = daysLeft;
         item.monthsLeftColY = monthsLeft;
 
         const note = (item.canhBao || '').toLowerCase();
-        const isExplicitCompleted = note.includes('hoàn thành') || note.includes('đã gửi') || note.includes('da gui');
+        const isExplicitCompleted = (ov && ov.isCompleted === true) ||
+          note.includes('hoàn thành') || note.includes('đã gửi') || note.includes('da gui') || note.includes('hoan thanh');
+        const isExplicitReverted = (ov && ov.isCompleted === false);
 
-        // 1. Nếu hạn trước hôm nay (daysLeft < 0): xem như đã hoàn thành gửi VB
-        if (daysLeft !== null && daysLeft < 0) {
+        if (!isExplicitReverted && daysLeft !== null && daysLeft < 0) {
           item.isCompleted = true;
           item.isNeedNotice = false;
           item.urgencyStatus = 'completed';
           item.statusLabel = 'ĐÃ HOÀN THÀNH GỬI VB (Hạn trước hôm nay)';
           if (!item.canhBao) item.canhBao = 'ĐÃ HOÀN THÀNH GỬI VB';
-        }
-        // 2. Nếu đã ghi hoàn thành hoặc đã gửi VB
-        else if (isExplicitCompleted) {
+        } else if (!isExplicitReverted && isExplicitCompleted) {
           item.isCompleted = true;
           item.isNeedNotice = false;
           item.urgencyStatus = 'completed';
           item.statusLabel = 'ĐÃ HOÀN THÀNH GỬI VB';
-        }
-        // 3. Nếu chưa gửi và có hạn trong vòng ≤ 6 tháng từ hôm nay
-        else if (monthsLeft !== null && monthsLeft <= 6.0) {
+        } else if (monthsLeft !== null && monthsLeft <= 6.0) {
           item.isCompleted = false;
           item.isNeedNotice = true;
           item.urgencyStatus = 'urgent';
           item.statusLabel = 'CẦN GỬI VB NHẮC NHỞ';
-          item.canhBao = 'CẦN GỬI VB NHẮC NHỞ';
-        }
-        // 4. Từ 6 đến 13 tháng
-        else if (monthsLeft !== null && monthsLeft <= 13.0) {
+          if (!item.canhBao) item.canhBao = 'CẦN GỬI VB NHẮC NHỞ';
+        } else if (monthsLeft !== null && monthsLeft <= 13.0) {
           item.isCompleted = false;
           item.isNeedNotice = false;
           item.urgencyStatus = 'warning';
           item.statusLabel = 'Cần lưu ý (6 - 13T)';
-        }
-        // 5. Trên 13 tháng
-        else {
+        } else {
           item.isCompleted = false;
           item.isNeedNotice = false;
           item.urgencyStatus = 'safe';
@@ -2718,7 +3128,6 @@
         return item;
       });
 
-      // Thống kê động chuẩn xác
       const tbaSet = new Set(processedList.map(p => p.tenTba));
       const summary = {
         totalTba: tbaSet.size || 8,

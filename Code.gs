@@ -10,9 +10,9 @@ const DEFAULT_CONFIG = {
   SPREADSHEET_ID: '1iI3Cl98W-WMg6ioHe8w4CZkb5NopkN8ZwzaUJM5WMDU',
   SHEET_NAME: 'Trang tính1',
   DRIVE_ROOT_FOLDER_ID: '1R_jh4t2wrE0SvmnjFpvKu7UmrHwXi6En',
-  HEADER_ROW: 5,        // Dòng tiêu đề kết thúc ở dòng 5
-  DATA_START_ROW: 6,    // Dữ liệu bắt đầu từ dòng 6
-  DEFAULT_REMINDER_MONTHS: 13 // Ngưỡng cảnh báo mặc định (tháng)
+  HEADER_ROW: 1,        // Dòng tiêu đề ở dòng 1
+  DATA_START_ROW: 2,    // Dữ liệu bắt đầu từ dòng 2 (từ STT KH 2 - TRẠM GIS 110 KV CHINA STEEL đến dòng 23)
+  DEFAULT_REMINDER_MONTHS: 6 // Ngưỡng cảnh báo mặc định (6 tháng theo Cột Y)
 };
 
 /**
@@ -218,7 +218,7 @@ function getDashboardData() {
 
       const rawValColY = rawValues[r][24];
       const displayValColY = String(rawDisplayValues[r][24] || '').trim();
-      let hanColY = parseDateInfo(rawValColY, displayValColY, '');
+      let hanColY = parseDateInfo(rawValColY, displayValColY, '', true);
 
       // Nếu ô Cột Y chưa có ngày, tự động lấy ngày hết hạn sớm nhất giữa Công tơ, TU và TI
       if (hanColY.monthsLeft === null) {
@@ -345,7 +345,8 @@ function getDashboardData() {
         phoneContact: extractedPhone,
 
         // Cột Y và Z chuẩn hóa theo thời gian thực và trạng thái gửi
-        ngayCanhBaoGanNhat: displayValColY || (hanColY.dateObj ? Utilities.formatDate(hanColY.dateObj, 'GMT+7', 'dd/MM/yyyy') : ''),
+        ngayCanhBaoGanNhat: hanColY.dateObj ? Utilities.formatDate(hanColY.dateObj, 'GMT+7', 'dd/MM/yyyy') : displayValColY,
+        ngayCanhBaoRaw: displayValColY,
         monthsLeftColY: monthsLeftColY,
         daysLeftColY: daysLeftColY,
         isNeedNotice: isNeedNotice,
@@ -382,17 +383,26 @@ function getDashboardData() {
 /**
  * Tính số tháng còn lại và trạng thái từ ngày hết hạn
  */
-function parseDateInfo(rawVal, displayVal, conLaiText) {
+function parseDateInfo(rawVal, displayVal, conLaiText, preferMonthFirst) {
   let dateObj = null;
   if (rawVal instanceof Date && !isNaN(rawVal.getTime())) {
     dateObj = rawVal;
   } else if (displayVal) {
     const parts = displayVal.toString().trim().split(/[\/\-\.]/);
     if (parts.length === 3) {
-      // Giả định định dạng dd/mm/yyyy hoặc mm/dd/yyyy
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
+      const p0 = parseInt(parts[0], 10);
+      const p1 = parseInt(parts[1], 10);
       const year = parseInt(parts[2], 10);
+      let day, month;
+      if (p1 > 12 || (preferMonthFirst && p0 >= 1 && p0 <= 12)) {
+        // Định dạng MM/DD/YYYY (như Cột Y: 10/31/2027, 6/30/2027)
+        month = p0 - 1;
+        day = p1;
+      } else {
+        // Định dạng DD/MM/YYYY (như Cột H, I, L, M, P, Q: 31/10/2027)
+        day = p0;
+        month = p1 - 1;
+      }
       if (year > 1900 && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
         dateObj = new Date(year, month, day);
       }
@@ -711,7 +721,16 @@ function updatePointData(payload) {
       if (payload.ti.hanKd !== undefined) sheet.getRange(r, 17).setValue(payload.ti.hanKd);
     }
 
-    // Cập nhật Hồ sơ chung (Cột V)
+    // Cập nhật Hồ sơ (S: Công tơ, T: TU, U: TI, V: Chung)
+    if (payload.hoSoCongTo !== undefined) {
+      sheet.getRange(r, 19).setValue(payload.hoSoCongTo);
+    }
+    if (payload.hoSoTu !== undefined) {
+      sheet.getRange(r, 20).setValue(payload.hoSoTu);
+    }
+    if (payload.hoSoTi !== undefined) {
+      sheet.getRange(r, 21).setValue(payload.hoSoTi);
+    }
     if (payload.tinhTrangChung !== undefined) {
       sheet.getRange(r, 22).setValue(payload.tinhTrangChung);
     }
@@ -724,6 +743,11 @@ function updatePointData(payload) {
     // Thông tin liên hệ (Cột X)
     if (payload.lienHe !== undefined) {
       sheet.getRange(r, 24).setValue(payload.lienHe);
+    }
+
+    // Ngày kiểm định gần nhất cần cảnh báo (Cột Y)
+    if (payload.ngayCanhBaoGanNhat !== undefined && payload.ngayCanhBaoGanNhat !== '') {
+      sheet.getRange(r, 25).setValue(payload.ngayCanhBaoGanNhat);
     }
 
     // Cảnh báo (Cột Z)
